@@ -5,8 +5,17 @@
    Description     : This module contains all components in the Memory stage of the 
                      processor.
 */
-module memory (/* TODO: Add appropriate inputs/outputs for your memory stage here*/);
+module memory (clk, rst, ALUOut, WriteData, Enable, Dump, MemWrite, MemOut);
 
-   // TODO: Your code here
+    // clk/rst
+   input clk, rst;
+   // data inputs
+   input [15:0] ALUOut, WriteData; // from execute
+   // control inputs
+   input Enable, Dump, MemWrite;
+   // data outputs
+   output [15:0] MemOut; // to wb
+   
+   memory2c DMEM(.data_out(MemOut), .data_in(WriteData), .addr(ALUOut), .enable(Enable), .wr(MemWrite), .createdump(Dump), .clk(clk), .rst(rst));
    
 endmodule
