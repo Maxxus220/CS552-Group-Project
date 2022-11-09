@@ -11,8 +11,7 @@
 //TODO: include signals for memory enable and dump
 // for HALT: enable = 0, dump = 1
 // for almost all other instructions: enable = 1, dump = 0;
-module control(clk, rst, Control, ALUControl, Enable, Dump, PCVal, RegDst, RegWrite, ExtMode, IType, Reg1Rev, Reg1Shift, Zero1, 
-	Zero2, ALUSrc, Branch, Jump, CompCarry, ALUComp, MemWrite, MemtoReg, AdrLink, ALUOp, sign, BrOp);
+module control(clk, rst, Control, ALUControl, ControlSignals);
 
 	//clock and reset
 	input clk, rst;
@@ -21,14 +20,16 @@ module control(clk, rst, Control, ALUControl, Enable, Dump, PCVal, RegDst, RegWr
 	input [1:0] ALUControl; // the function bits of this operation (used only for R-Type ALU operations that share an opcode)
 	
 	// control outputs
-	output Enable, Dump, PCVal;
- 	output [1:0] RegDst;
- 	output RegWrite;
- 	output ExtMode, IType, Reg1Rev, Reg1Shift, Zero1, Zero2, ALUSrc, Branch, Jump, CompCarry, ALUComp;
-	output MemWrite, MemtoReg, AdrLink;
-	output reg [2:0] ALUOp;
-	output reg sign;
-	output reg [2:0] BrOp;
+	output [26:0] ControlSignals;
+	
+	wire Enable, Dump, PCVal;
+ 	wire [1:0] RegDst;
+ 	wire RegWrite;
+ 	wire ExtMode, IType, Reg1Rev, Reg1Shift, Zero1, Zero2, ALUSrc, Branch, Jump, CompCarry, ALUComp;
+	wire MemWrite, MemtoReg, AdrLink;
+	reg [2:0] ALUOp;
+    reg sign;
+	reg [2:0] BrOp;
 	
 
 	// MAIN CONTROL UNIT
@@ -135,5 +136,8 @@ module control(clk, rst, Control, ALUControl, Enable, Dump, PCVal, RegDst, RegWr
 			BrOp = 3'b000; // result from this operation should not matter; Branch and ALUComp == 0
 		end
 	endcase
+	
+	assign ControlSignals = {ALUOp, BrOp, PCVal, ExtMode, IType, Reg1Rev, Reg1Shift, Zero1, Zero2, ALUSrc, Branch, Jump, CompCarry, ALUComp, sign,
+			Enable, Dump, MemWrite, MemtoReg, RegDst, RegWrite, AdrLink};
 	
 endmodule
