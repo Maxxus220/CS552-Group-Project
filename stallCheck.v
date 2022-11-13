@@ -13,7 +13,7 @@ module stallCheck(
 	// Dictate whether a stall should occur
 	assign stall = rdrsMatch | rdrtMatch;
 	
-    always begin
+    always @* begin
 	    // Find the source registers
 	    casex(inst1[15:11])
 		    // R - Format
@@ -81,6 +81,8 @@ module stallCheck(
 				src2 = 3'zzz;
 			end
 		endcase
+	end
+	always @* begin
 		// Find the destination register
 		casex(inst2[15:11])
 		    // R - Format
