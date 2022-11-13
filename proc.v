@@ -26,7 +26,8 @@ module proc (/*AUTOARG*/
    // I/O signals
 	wire [15:0] JBAdr;
 	
-	wire [15:0] instr_FETCH, instr_DECODE;
+	wire [15:0] instr_FETCH, instr_DECODE, instr_EXECUTE, instr_MEMORY;
+	wire [15:0] instr_IN; // instruction that enters the fetch block after considering stalls
 	wire [15:0] PCplus2_FETCH, PCplus2_DECODE, PCplus2_EXECUTE, PCplus2_MEMORY, PCplus2_WB;
 	wire [15:0] RegData_DECODE, RegData_EXECUTE;
 	wire [15:0] Reg1_DECODE, Reg2_DECODE, Reg1_EXECUTE, Reg2_EXECUTE;
@@ -43,15 +44,18 @@ module proc (/*AUTOARG*/
 	wire [7:0]  ControlSignals_MEMORY; 
 	wire [4:0]  ControlSignals_WB;
 	
+	wire stall;
 	
 	// stall block module - checks for dependencies and inserts NOPs as needed
+	stallBlock(.inst_If(instr_FETCH), .inst_IfId(instr_DECODE), .inst_IdEx(instr_EXECUTE), .inst_ExMem(instr_MEMORY), 
+		.inst_out(instr_IN), .stall(stall));
 	
 	// control module
 	control CONTROL(.clk(clk), .rst(rst), .Control(Control), .ALUControl(instr_imm[1:0]), .ControlSignals(ControlSignals_DECODE));
    
     // fetch module
 	fetch FETCH(.clk(clk), .rst(rst), .JBAdr(JBAdr), 	// fetch data inputs
-   		.PCVal(ControlSignals_EXECUTE[6]), .Enable(Enable), .Dump(Dump), 	// fetch control inputs
+   		.PCVal(ControlSignals_EXECUTE[6]), .Enable(Enable), .Dump(Dump), .stall(stall), 	// fetch control inputs
    		.instr(instr_FETCH), .PCplus2(PCplus2_FETCH));	// fetch outputs
    		
    	// fetch-decode flip flop	
@@ -64,8 +68,8 @@ module proc (/*AUTOARG*/
    		 .JumpOffset(JumpOffset_DECODE), .instr_imm(instr_imm_DECODE), .Control(Control));	// decode outputs
    		 
    	// decode-execute data flip flop
-   	dff DX_DATA_FF [71:0] (.q({instr_imm_EXECUTE,JumpOffset_EXECUTE,PCplus2_EXECUTE,Reg2_EXECUTE,Reg1_EXECUTE}), 
-   						   .d({instr_imm_DECODE,JumpOffset_DECODE,PCplus2_DECODE,Reg2_DECODE,Reg1_DECODE}), 
+   	dff DX_DATA_FF [87:0] (.q({instr_EXECUTE,instr_imm_EXECUTE,JumpOffset_EXECUTE,PCplus2_EXECUTE,Reg2_EXECUTE,Reg1_EXECUTE}), 
+   						   .d({instr_DECODE,instr_imm_DECODE,JumpOffset_DECODE,PCplus2_DECODE,Reg2_DECODE,Reg1_DECODE}), 
    						   .clk(clk), .rst(rst));
    	
    	// decode-execute control flip flop
@@ -81,8 +85,8 @@ module proc (/*AUTOARG*/
    		.ALUOut(ALUOut_EXECUTE), .DataOut(DataOut_EXECUTE), .JBAdr(JBAdr), .WriteData(WriteData_EXECUTE)); 							// execute outputs (JBAdr ties directly to fetch)
    		
    	// execute-memory data flip flop
-   	dff XM_DATA_FF [63:0] (.q({PCplus2_MEMORY,DataOut_MEMORY,WriteData_MEMORY,ALUOut_MEMORY}), 
-   						   .d({PCplus2_EXECUTE,DataOut_EXECUTE,WriteData_EXECUTE,ALUOut_EXECUTE}), 
+   	dff XM_DATA_FF [79:0] (.q({instr_MEMORY,PCplus2_MEMORY,DataOut_MEMORY,WriteData_MEMORY,ALUOut_MEMORY}), 
+   						   .d({instr_EXECUTE,PCplus2_EXECUTE,DataOut_EXECUTE,WriteData_EXECUTE,ALUOut_EXECUTE}), 
    						   .clk(clk), .rst(rst));
    	
    	// execute-memory control flip flop
