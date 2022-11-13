@@ -26,7 +26,7 @@ module fetch (clk, rst, JBAdr, Enable, Dump, PCVal, stall, instr, PCplus2);
    // TODO: tie enable signal to something else to do NOPs
    memory2c IMEM (.data_out(instr), .data_in(16'h0000), .addr(PC), .enable(Enable), .wr(1'b0), .createdump(Dump), .clk(clk), .rst(rst));
    mux16_2 MUX_PCVal(.out(NewPC), .in0(PCplus2), .in1(JBAdr), .sel(PCVal));
-   mux16_2 MUX_PCVal(.out(FinalPC), .in0(NewPC), .in1(16'h0800), .sel(PC)); // don't update PC value if stalling
+   mux16_2 MUX_Stall(.out(FinalPC), .in0(NewPC), .in1(PC), .sel(stall)); // don't update PC value if stalling
    reg16 PC_REG(.readData(PC), .writeData(FinalPC), .clk(clk), .rst(rst)); 
    
 endmodule

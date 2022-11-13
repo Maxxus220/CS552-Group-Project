@@ -77,8 +77,8 @@ module stallCheck(
 			// J - Format & Other
 		    default: begin
 			    // Hardcode
-			    src1 = 3'zzz;
-				src2 = 3'zzz;
+			    src1 = 3'bzzz;
+				src2 = 3'bzzz;
 			end
 		endcase
 	end
@@ -131,7 +131,7 @@ module stallCheck(
 			// J - Format, Branch and Others
 		    default: begin
 			    // Hardcode
-			    dest = 3'zzz;
+			    dest = 3'bzzz;
 			end
 		endcase
 	end

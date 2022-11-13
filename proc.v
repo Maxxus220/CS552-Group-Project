@@ -47,11 +47,11 @@ module proc (/*AUTOARG*/
 	wire stall;
 	
 	// stall block module - checks for dependencies and inserts NOPs as needed
-	stallBlock(.inst_If(instr_FETCH), .inst_IfId(instr_DECODE), .inst_IdEx(instr_EXECUTE), .inst_ExMem(instr_MEMORY), 
+	stallBlock STALL(.inst_If(instr_FETCH), .inst_IfId(instr_DECODE), .inst_IdEx(instr_EXECUTE), .inst_ExMem(instr_MEMORY), 
 		.inst_out(instr_IN), .stall(stall));
 	
 	// control module
-	control CONTROL(.clk(clk), .rst(rst), .Control(Control), .ALUControl(instr_imm[1:0]), .ControlSignals(ControlSignals_DECODE));
+	control CONTROL(.clk(clk), .rst(rst), .Control(Control), .ALUControl(instr_imm_DECODE[1:0]), .ControlSignals(ControlSignals_DECODE));
    
     // fetch module
 	fetch FETCH(.clk(clk), .rst(rst), .JBAdr(JBAdr), 	// fetch data inputs
@@ -62,7 +62,7 @@ module proc (/*AUTOARG*/
 	dff FD_FF [31:0] (.q({PCplus2_DECODE,instr_DECODE}), .d({PCplus2_FETCH,instr_FETCH}), .clk(clk), .rst(rst));
    	
    	// decode module
-	decode DECODE(.clk(clk), .rst(rst), .instr(instr), .RegData(RegData),					// decode data inputs
+	decode DECODE(.clk(clk), .rst(rst), .instr(instr_DECODE), .RegData(RegData_DECODE),					// decode data inputs
    		 .RegDst(ControlSignals_WB[2:1]), .RegWrite(ControlSignals_WB[3]), 												// decode control inputs
    		 .Reg1(Reg1_DECODE), .Reg2(Reg2_DECODE), 
    		 .JumpOffset(JumpOffset_DECODE), .instr_imm(instr_imm_DECODE), .Control(Control));	// decode outputs
@@ -78,10 +78,10 @@ module proc (/*AUTOARG*/
    	// execute module
 	execute EXECUTE(.clk(clk), .rst(rst), .Reg1(Reg1_EXECUTE), .Reg2(Reg2_EXECUTE), .JumpOffset(JumpOffset_EXECUTE), 
 		.PCplus2(PCplus2_EXECUTE), .instr_imm(instr_imm_EXECUTE), 																	// execute data inputs
-   		.ExtMode(ControlSignals_EXECUTE[7]), .IType(ControlSignals_EXECUTE[8])), .Reg1Rev(ControlSignals_EXECUTE[9])), 
-   		.Reg1Shift(ControlSignals_EXECUTE[10])), .Zero1(ControlSignals_EXECUTE[11])), .Zero2(ControlSignals_EXECUTE[12])), 
-   		.ALUSrc(ControlSignals_EXECUTE[13])), .BrOp(ControlSignals_EXECUTE[5:3])), .Branch(ControlSignals_EXECUTE[14])), .Jump(ControlSignals_EXECUTE[15])), 
-   		.CompCarry(ControlSignals_EXECUTE[16])), .ALUComp(ControlSignals_EXECUTE[17])), .ALUOp(ControlSignals_EXECUTE[2:0])), .sign(ControlSignals_EXECUTE[18])),	// execute control inputs
+   		.ExtMode(ControlSignals_EXECUTE[7]), .IType(ControlSignals_EXECUTE[8]), .Reg1Rev(ControlSignals_EXECUTE[9]), 
+   		.Reg1Shift(ControlSignals_EXECUTE[10]), .Zero1(ControlSignals_EXECUTE[11]), .Zero2(ControlSignals_EXECUTE[12]), 
+   		.ALUSrc(ControlSignals_EXECUTE[13]), .BrOp(ControlSignals_EXECUTE[5:3]), .Branch(ControlSignals_EXECUTE[14]), .Jump(ControlSignals_EXECUTE[15]), 
+   		.CompCarry(ControlSignals_EXECUTE[16]), .ALUComp(ControlSignals_EXECUTE[17]), .ALUOp(ControlSignals_EXECUTE[2:0]), .sign(ControlSignals_EXECUTE[18]),	// execute control inputs
    		.ALUOut(ALUOut_EXECUTE), .DataOut(DataOut_EXECUTE), .JBAdr(JBAdr), .WriteData(WriteData_EXECUTE)); 							// execute outputs (JBAdr ties directly to fetch)
    		
    	// execute-memory data flip flop
@@ -108,7 +108,7 @@ module proc (/*AUTOARG*/
    	// writeback module
 	wb WRITEBACK(.clk(clk), .rst(rst), .DataOut(DataOut_WB), .MemOut(MemOut_WB), .PCplus2(PCplus2_WB), 	// wb data inputs
    		.MemtoReg(ControlSignals_WB[0]), .AdrLink(ControlSignals_WB[4]), 														// wb control inputs
-   		.RegData(RegData));																				// wb outputs
+   		.RegData(RegData_DECODE));																				// wb outputs
    				
 endmodule // proc
 // DUMMY LINE FOR REV CONTROL :0:
