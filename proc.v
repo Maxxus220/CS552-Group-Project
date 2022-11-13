@@ -43,6 +43,9 @@ module proc (/*AUTOARG*/
 	wire [7:0]  ControlSignals_MEMORY; 
 	wire [4:0]  ControlSignals_WB;
 	
+	
+	// stall block module - checks for dependencies and inserts NOPs as needed
+	
 	// control module
 	control CONTROL(.clk(clk), .rst(rst), .Control(Control), .ALUControl(instr_imm[1:0]), .ControlSignals(ControlSignals_DECODE));
    
