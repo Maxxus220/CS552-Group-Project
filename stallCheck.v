@@ -11,7 +11,7 @@ module stallCheck(
 	regCheck rdrs1(.match(match1), .reg1(dest), .reg2(src1)); 
 	regCheck rdrs2(.match(match2), .reg1(dest), .reg2(src2));
 	// Dictate whether a stall should occur
-	assign stall = rdrsMatch | rdrtMatch;
+	assign stall = match1 | match2;
 	
     always @* begin
 	    // Find the source registers
