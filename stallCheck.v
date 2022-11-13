@@ -49,7 +49,7 @@ module stallCheck(
 				src2 = inst1[10:8];				
 			end
 			// Load
-			5'100001: begin
+			5'b10001: begin
 				src1 = inst1[10:8];
 				src2 = inst1[10:8];				
 			end
@@ -108,7 +108,7 @@ module stallCheck(
 				dest = inst2[7:5];				
 			end
 			// Load
-			5'100001: begin
+			5'b10001: begin
 				dest = inst2[7:5];			
 			end
 			// STU
