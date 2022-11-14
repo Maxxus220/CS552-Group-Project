@@ -127,8 +127,8 @@ module proc_hier_pbench();
    // Edit the example below. You must change the signal
    // names on the right hand side
     
-   //assign PC = DUT.PC_Out;
-   //assign Inst = DUT.Instruction_f;
+   assign PC = DUT.p0.FETCH.PC;
+   assign Inst = DUT.p0.FETCH.instr;
    
    assign RegWrite = DUT.p0.DECODE.REG_FILE.writeEn;
    // Is register file being written to, one bit signal (1 means yes, 0 means no)
@@ -154,26 +154,24 @@ module proc_hier_pbench();
    assign MemDataOut = DUT.p0.MEMORY.MemOut;
    // Data read from memory for memory reads (16 bits)
 
-   /** NO CACHES IMPLEMENTED YET
    // new added 05/03
-   assign ICacheReq = DUT.p0.readData;
+   assign ICacheReq = 0; //DUT.p0.readData;
    // Signal indicating a valid instruction read request to cache
    // Above assignment is a dummy example
    
-   assign ICacheHit = DUT.p0.readData;
+   assign ICacheHit = 0; //DUT.p0.readData;
    // Signal indicating a valid instruction cache hit
    // Above assignment is a dummy example
 
-   assign DCacheReq = DUT.p0.readData;
+   assign DCacheReq = 0; //DUT.p0.readData;
    // Signal indicating a valid instruction data read or write request to cache
    // Above assignment is a dummy example
    //    
-   assign DCacheHit = DUT.p0.readData;
+   assign DCacheHit = 0; //DUT.p0.readData;
    // Signal indicating a valid data cache hit
    // Above assignment is a dummy example
-   **/
    
-   assign Halt = ~DUT.p0.CONTROL.Enable;
+   assign Halt = DUT.p0.Halt; //TODO: 
    // Processor halted
    
    

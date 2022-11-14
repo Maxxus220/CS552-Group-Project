@@ -1,5 +1,7 @@
 // Helper module for checking whther a stall should occur
 module stallCheck(
+	input clk,
+	input rst,
     input [15:0] inst1,
 	input [15:0] inst2,
 	output stall
@@ -8,8 +10,8 @@ module stallCheck(
     reg [2:0] dest, src1, src2; 
 	wire match1, match2;
 	// obtain the matching for each RAW potential
-	regCheck rdrs1(.match(match1), .reg1(dest), .reg2(src1)); 
-	regCheck rdrs2(.match(match2), .reg1(dest), .reg2(src2));
+	regCheck rdrs1(.clk(clk), .rst(rst), .match(match1), .reg1(dest), .reg2(src1)); 
+	regCheck rdrs2(.clk(clk), .rst(rst), .match(match2), .reg1(dest), .reg2(src2));
 	// Dictate whether a stall should occur
 	assign stall = match1 | match2;
 	
@@ -18,12 +20,12 @@ module stallCheck(
 	    casex(inst1[15:11])
 		    // R - Format
 			// Shifts and arithmetic
-			5'b1101x: begin
+			5'b11010, 5'b11011: begin
 				src1 = inst1[10:8];
 				src2 = inst1[7:5];
 			end			
 			// Sets
-			5'b111xx: begin
+			5'b11100, 5'b11101, 5'b11110, 5'b11111: begin
 				src1 = inst1[10:8];
 				src2 = inst1[7:5];
 			end
@@ -34,12 +36,12 @@ module stallCheck(
 			end
 			// I - Format - 1
 			// Immediate arrithmetic
-			5'b010xx: begin
+			5'b01000, 5'b01001, 5'b01010, 5'b01011: begin
 				src1 = inst1[10:8];	
 				src2 = inst1[10:8];		
 			end
 			// Immediate shifts
-			5'b101xx: begin
+			5'b10100, 5'b10101, 5'b10110, 5'b10111: begin
 				src1 = inst1[10:8];
 				src2 = inst1[10:8];				
 			end
@@ -65,12 +67,12 @@ module stallCheck(
 				src2 = inst1[10:8];				
 			end
 			// JR & JALR
-			5'b001x1: begin
+			5'b00101, 5'b00111: begin
 				src1 = inst1[10:8];
 				src2 = inst1[10:8];				
 			end
 			// Branch
-			5'b011xx: begin
+			5'b01100, 5'b01101, 5'b01110, 5'b01111: begin
 				src1 = inst1[10:8];
 				src2 = inst1[10:8];				
 			end
@@ -87,11 +89,11 @@ module stallCheck(
 		casex(inst2[15:11])
 		    // R - Format
 			// Shifts and arithmetic
-			5'b1101x: begin
+			5'b11010, 5'b11011: begin
 				dest = inst2[4:2];
 			end			
 			// Sets
-			5'b111xx: begin
+			5'b11100, 5'b11101, 5'b11110, 5'b11111: begin
 				dest = inst2[4:2];
 			end
 			// BTR
@@ -100,11 +102,11 @@ module stallCheck(
 			end
 			// I - Format - 1
 			// Immediate arrithmetic
-			5'b010xx: begin
+			5'b01000, 5'b01001, 5'b01010, 5'b01011: begin
 				dest = inst2[7:5];	
 			end
 			// Immediate shifts
-			5'b101xx: begin
+			5'b10100, 5'b10101, 5'b10110, 5'b10111: begin
 				dest = inst2[7:5];				
 			end
 			// Load
@@ -125,7 +127,7 @@ module stallCheck(
 				dest = inst2[10:8];			
 			end
 			// JAL & JALR
-			5'b0011x: begin
+			5'b00101, 5'b00111: begin
 				dest = 3'b111;			
 			end
 			// J - Format, Branch and Others

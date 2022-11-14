@@ -4,12 +4,13 @@
    Filename        : decode.v
    Description     : This is the module for the overall decode stage of the processor.
 */
-module decode (clk, rst, instr, RegData, RegDst, RegWrite, Reg1, Reg2, JumpOffset, instr_imm, Control);
+module decode (clk, rst, instr, instr_wb, RegData, RegDst, RegWrite, Reg1, Reg2, JumpOffset, instr_imm, Control);
 
 	// clk/rst
 	input clk, rst;
 	// data inputs
 	input [15:0] instr; // from fetch
+	input [15:0] instr_wb;
 	input [15:0] RegData; // from wb
 	// control inputs
 	input [1:0] RegDst;
@@ -27,7 +28,7 @@ module decode (clk, rst, instr, RegData, RegDst, RegWrite, Reg1, Reg2, JumpOffse
 	assign instr_imm = instr[7:0]; // these signals are passed to control block and exec block as is
 
 	extend11_16 JMP_OFF(.out(JumpOffset), .in(instr[10:0]), .sel(1'b1)); // this block will never do zero-extension
-	mux3_4 MUX_RegDST(.out(WriteAdr), .in0(instr[10:8]), .in1(instr[7:5]), .in2(instr[4:2]), .in3(3'h7), .sel(RegDst)); // select write register
+	mux3_4 MUX_RegDST(.out(WriteAdr), .in0(instr_wb[10:8]), .in1(instr_wb[7:5]), .in2(instr_wb[4:2]), .in3(3'h7), .sel(RegDst)); // select write register
 
 	// register file with bypass logic
 	// technically we don't need bypass logic for a single-cycle datapath, but it won't hurt to have it for later
