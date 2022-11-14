@@ -15,7 +15,11 @@ module stallBlock(
 	stallCheck checkIdEx(.clk(clk), .rst(rst), .inst1(inst_If), .inst2(inst_IdEx), .stall(stall_IdEx));
 	stallCheck checkExMem(.clk(clk), .rst(rst), .inst1(inst_If), .inst2(inst_ExMem), .stall(stall_ExMem));
 	// Decide whether to stall
-	assign inst_out = (stall_IFID | stall_IdEx | stall_ExMem) ? (15'h0800) : (inst_If);
 	assign stall = (stall_IFID | stall_IdEx | stall_ExMem);
+	// Decide whether to propogate a halt
+	assign halt = (~(|inst_IfId[15:11])) | (~(|inst_IdEx[15:11])) | (~(|inst_ExMem[15:11]));
+	// Assign the instruction value based on fetch or the halt/stall logic
+	assign inst_out = (halt) ? (16'h0000) : ((stall ? (16'h0800) : (inst_If)));
+	
 endmodule
 

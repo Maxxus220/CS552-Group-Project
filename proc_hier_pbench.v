@@ -27,6 +27,23 @@ module proc_hier_pbench();
    wire        DCacheReq;
    wire        ICacheReq;
    
+   // FEIST TEST WIRES
+   wire BranchEnable;
+   wire Branch;
+   wire [15:0] JBAddr;
+   wire [15:0] PCTwo_FETCH;
+   wire [15:0] PCTwo_EXECUTE;
+   wire PCVal;
+   // FEIST wire assigns
+   assign Branch = DUT.p0.EXECUTE.Branch;
+   assign BranchEnable = DUT.p0.EXECUTE.BrEn;
+   
+   // assign JBAddr = DUT.p0.FETCH.;
+   // assign PCVal = DUT.p0.FETCH.;
+   assign PCTwo_FETCH = DUT.p0.FETCH.ADD2.sum;
+   assign PCTwo_EXECUTE = DUT.p0.EXECUTE.PCplus2;
+   
+   
 
    wire        Halt;         /* Halt executed and in Memory or writeback stage */
         
@@ -86,6 +103,9 @@ module proc_hier_pbench();
                    MemWrite,
                    MemAddress,
                    MemDataIn);
+        // $fdisplay(trace_file,"Instr: %d PC+2_FETCH: %h PC+2_EX: %h PCVal: %d JBAddr: %d",
+         	//	PC/2, PCTwo_FETCH, PCTwo_EXECUTE, PCVal, JBAddr);
+         			
          if (RegWrite) begin
             $fdisplay(trace_file,"REG: %d VALUE: 0x%04x",
                       WriteRegister,
@@ -126,6 +146,7 @@ module proc_hier_pbench();
 
    // Edit the example below. You must change the signal
    // names on the right hand side
+   
     
    assign PC = DUT.p0.FETCH.PC;
    assign Inst = DUT.p0.FETCH.instr;
@@ -139,7 +160,7 @@ module proc_hier_pbench();
    assign WriteData = DUT.p0.DECODE.REG_FILE.writeData;
    // Data being written to the register. (16 bits)
    
-   assign MemRead =  DUT.p0.WRITEBACK.MemtoReg; // & ~DUT.p0.notdonem);
+   assign MemRead =  DUT.p0.ControlSignals_MEMORY[4]; // & ~DUT.p0.notdonem);
    // Is memory being read, one bit signal (1 means yes, 0 means no)
    
    assign MemWrite = DUT.p0.MEMORY.MemWrite; // & ~DUT.p0.notdonem);
@@ -148,7 +169,7 @@ module proc_hier_pbench();
    assign MemAddress = DUT.p0.MEMORY.ALUOut;
    // Address to access memory with (for both reads and writes to memory, 16 bits)
    
-   assign MemData = DUT.p0.MEMORY.WriteData;
+   assign MemDataIn = DUT.p0.MEMORY.WriteData;
    // Data to be written to memory for memory writes (16 bits)
    
    assign MemDataOut = DUT.p0.MEMORY.MemOut;

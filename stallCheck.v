@@ -48,7 +48,7 @@ module stallCheck(
 			// Store
 			5'b10000: begin
 				src1 = inst1[10:8];
-				src2 = inst1[10:8];				
+				src2 = inst1[7:5];				
 			end
 			// Load
 			5'b10001: begin
@@ -58,7 +58,7 @@ module stallCheck(
 			// STU
 			5'b10011: begin
 				src1 = inst1[10:8];
-				src2 = inst1[10:8];				
+				src2 = inst1[7:5];				
 			end
 			// I - Format - 2
 			// SLBI
@@ -69,7 +69,7 @@ module stallCheck(
 			// JR & JALR
 			5'b00101, 5'b00111: begin
 				src1 = inst1[10:8];
-				src2 = inst1[10:8];				
+				src2 = inst1[10:8];			
 			end
 			// Branch
 			5'b01100, 5'b01101, 5'b01110, 5'b01111: begin
@@ -127,7 +127,7 @@ module stallCheck(
 				dest = inst2[10:8];			
 			end
 			// JAL & JALR
-			5'b00101, 5'b00111: begin
+			5'b00110, 5'b00111: begin
 				dest = 3'b111;			
 			end
 			// J - Format, Branch and Others

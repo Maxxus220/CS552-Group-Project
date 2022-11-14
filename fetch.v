@@ -4,33 +4,36 @@
    Filename        : fetch.v
    Description     : This is the module for the overall fetch stage of the processor.
 */
-module fetch (clk, rst, JBAdr, Enable, Dump, PCVal, stall, instr, PCplus2);
+module fetch (clk, rst, JBAdr, Enable, Dump, PCVal, stall, instr, PCplus2, BrJmpTaken);
 
    // clk/rst
    input clk, rst;
    // data inputs
    input [15:0] JBAdr; // from execute
+   //input BrEn;
    // control inputs
-   input Enable, Dump, PCVal, stall;
+   input Enable, Dump, PCVal, stall, BrJmpTaken;
    // data outputs
    output [15:0] instr; // to decode
    output [15:0] PCplus2; // to execute and wb
    
-   wire [15:0] PC;
-   wire [15:0] DumpTest;
+   wire [15:0] PC, newPC;
    wire [15:0] instr_fetch;
-   wire [15:0] NewPC; 
-   wire [15:0] FinalPC; // final input to PC after all branches/jumps/stalls have been considered
    wire dummy; // dummy wire for adder c_out (unused)
    
-   cla_16b ADD2(.sum(PCplus2), .c_out(dummy), .a(PC), .b(16'h0002), .c_in(1'b0));
-   // Instruction memory is read-only and always enabled
-   // TODO: tie enable signal to something else to do NOPs
    
+   // Memory Block
+   // takes and address of PC which can come from either the jump address or the PC+2
+   // Instruction memory is read-only and always enabled
    memory2c IMEM (.data_out(instr_fetch), .data_in(16'h0000), .addr(PC), .enable(1), .wr(1'b0), .createdump(Dump), .clk(clk), .rst(rst));
-   mux16_2 MUX_PCVal(.out(NewPC), .in0(PCplus2), .in1(JBAdr), .sel(PCVal));
-   mux16_2 MUX_Stall(.out(FinalPC), .in0(NewPC), .in1(PC), .sel(stall)); // don't update PC value if stalling
-   reg16 PC_REG(.readData(PC), .writeData(FinalPC), .clk(clk), .rst(rst));
+   
+   // PC storage
+   // Devlop PCplus2 signal
+   cla_16b ADD2(.sum(PCplus2), .c_out(dummy), .a(PC), .b(16'h0002), .c_in(1'b0));
+   // Develop what the new PC value should be
+   assign newPC = (BrJmpTaken) ? (JBAdr) : ((stall) ? (PC) : (PCplus2));
+   // Store  new PC value
+   reg16 PC_REG(.readData(PC), .writeData(newPC), .clk(clk), .rst(rst));
    
    assign instr = (Dump) ? (16'h0000) : (instr_fetch);
    
