@@ -42,7 +42,6 @@ module proc (/*AUTOARG*/
 	wire [15:0] DataOut_EXECUTE, DataOut_MEMORY, DataOut_WB;
 	wire [15:0] WriteData_EXECUTE, WriteData_MEMORY;
 	wire [15:0] MemOut_MEMORY, MemOut_WB;
-	wire BrJmpTaken;
 
 	//////////////////////
 	// CONTROL SIGNALS //
@@ -54,6 +53,7 @@ module proc (/*AUTOARG*/
 
 	wire Stall;
 	wire Halt;
+	wire BrJmpTaken;
 
 	wire [15:0] fill, fillplus1, newfill;
 	wire dummy;
