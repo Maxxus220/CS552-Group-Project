@@ -5,7 +5,7 @@
    Description     : This is the overall module for the execute stage of the processor.
 */
 module execute (clk, rst, Reg1, Reg2, JumpOffset, PCplus2, instr_imm, ExtMode, IType, Reg1Rev, Reg1Shift, 
-				Zero1, Zero2, ALUSrc, BrOp, Branch, Jump, CompCarry, ALUComp, ALUOp, sign, PcVal, ALUOut, DataOut, JBAdr, WriteData, BrJmpTaken);
+				Zero1, Zero2, ALUSrc, BrOp, Branch, Jump, CompCarry, ALUComp, ALUOp, sign, PCVal, ALUOut, DataOut, JBAdr, WriteData, BrJmpTaken);
 
 	// clk/rst
 	input clk, rst;
@@ -18,7 +18,7 @@ module execute (clk, rst, Reg1, Reg2, JumpOffset, PCplus2, instr_imm, ExtMode, I
 	input ExtMode, IType, Reg1Rev, Reg1Shift, Zero1, Zero2, ALUSrc, Branch, Jump, CompCarry, ALUComp;
 	input [2:0] ALUOp, BrOp;  
 	input sign;
-	input PcVal;
+	input PCVal;
 	// data outputs
 	output [15:0] ALUOut; // to memory
 	output [15:0] DataOut; // to wb
@@ -135,6 +135,6 @@ module execute (clk, rst, Reg1, Reg2, JumpOffset, PCplus2, instr_imm, ExtMode, I
 	// select between ALUOut or branch comparison (including carry bit)
 	assign RawComp = {15'h0000, BrOpOut}; // extend RawComp to 16 bits before selecting between it and ALUOut
 	mux16_2 MUX_ALUComp(.out(DataOut), .in0(ALUOut), .in1(RawComp), .sel(ALUComp));
-	assign BrJmpTaken = BrEn | (PcVal & ~Branch);
+	assign BrJmpTaken = BrEn | (PCVal & ~Branch);
    
 endmodule
