@@ -25,7 +25,7 @@ module fetch (clk, rst, JBAdr, Enable, Dump, PCVal, stall, instr, PCplus2, BrJmp
    // Memory Block
    // takes and address of PC which can come from either the jump address or the PC+2
    // Instruction memory is read-only and always enabled
-   memory2c IMEM (.data_out(instr_fetch), .data_in(16'h0000), .addr(PC), .enable(1), .wr(1'b0), .createdump(Dump), .clk(clk), .rst(rst));
+   memory2c IMEM (.data_out(instr_fetch), .data_in(16'h0000), .addr(PC), .enable(1'b1), .wr(1'b0), .createdump(Dump), .clk(clk), .rst(rst));
    
    // PC storage
    // Devlop PCplus2 signal

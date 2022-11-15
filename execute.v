@@ -5,7 +5,7 @@
    Description     : This is the overall module for the execute stage of the processor.
 */
 module execute (clk, rst, Reg1, Reg2, JumpOffset, PCplus2, instr_imm, ExtMode, IType, Reg1Rev, Reg1Shift, 
-				Zero1, Zero2, ALUSrc, BrOp, Branch, Jump, CompCarry, ALUComp, ALUOp, sign, PCVal, ALUOut, DataOut, JBAdr, WriteData, BrJmpTaken);
+				Zero1, Zero2, ALUSrc, BrOp, Branch, JumpType, CompCarry, ALUComp, ALUOp, sign, PCVal, ALUOut, DataOut, JBAdr, WriteData, BrJmpTaken);
 
 	// clk/rst
 	input clk, rst;
@@ -15,7 +15,7 @@ module execute (clk, rst, Reg1, Reg2, JumpOffset, PCplus2, instr_imm, ExtMode, I
 	input [15:0] PCplus2; // from fetch
 	input [7:0] instr_imm; // from decode
 	// control inputs
-	input ExtMode, IType, Reg1Rev, Reg1Shift, Zero1, Zero2, ALUSrc, Branch, Jump, CompCarry, ALUComp;
+	input ExtMode, IType, Reg1Rev, Reg1Shift, Zero1, Zero2, ALUSrc, Branch, JumpType, CompCarry, ALUComp;
 	input [2:0] ALUOp, BrOp;  
 	input sign;
 	input PCVal;
@@ -129,7 +129,7 @@ module execute (clk, rst, Reg1, Reg2, JumpOffset, PCplus2, instr_imm, ExtMode, I
 	
 	// select appropriate branch or jump address
 	mux16_2 MUX_BrEn(.out(BranchAdr), .in0(PCplus2), .in1(PC2OffB), .sel(BrEn)); // determine if branch is taken
-	mux16_2 MUX_Jump(.out(JumpAdr), .in0(ALUOut), .in1(PC2OffJ), .sel(Jump));
+	mux16_2 MUX_Jump(.out(JumpAdr), .in0(ALUOut), .in1(PC2OffJ), .sel(JumpType));
 	mux16_2 MUX_Branch(.out(JBAdr), .in0(JumpAdr), .in1(BranchAdr), .sel(Branch));
 
 	// select between ALUOut or branch comparison (including carry bit)
