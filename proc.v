@@ -54,14 +54,6 @@ module proc (/*AUTOARG*/
 	wire Stall;
 	wire Halt;
 	wire BrJmpTaken;
-
-	// wire [15:0] fill, fillplus1, newfill;
-	// wire dummy;
-
-	// cla_16b FILL(.sum(fillplus1), .c_out(dummy), .a(fill), .b(16'h0001), .c_in(1'b0));
-	// assign newfill = (fill == 16'h0004 ? fill : fillplus1);
-	// dff WAIT [15:0] (.q(fill), .d(newfill), .clk(clk), .rst(rst));
-	
 	
 	//////////////////////////////
 	// CONTROL SIGNAL PIPELINE //
