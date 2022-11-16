@@ -117,39 +117,60 @@ module proc (/*AUTOARG*/
 		// Stall Block Module 
 		/* Checks for dependencies and inserts NOPs as needed
 		Produces a stall command as well */
-		stallBlock STALL(.clk(clk), .rst(rst), .inst_If(Instr_FETCH), .inst_IfId(Instr_DECODE), .inst_IdEx(Instr_EXECUTE), 
-						.inst_ExMem(Instr_MEMORY), .inst_out(Instr_IN), .stall(Stall));
+		stallBlock STALL(
+			.clk(clk), .rst(rst), 
+			.inst_If(Instr_FETCH), .inst_IfId(Instr_DECODE), .inst_IdEx(Instr_EXECUTE), 
+			.inst_ExMem(Instr_MEMORY), .inst_out(Instr_IN), .stall(Stall)
+		);
 	
 		// Fetch
-		fetch FETCH(.clk(clk), .rst(rst), .JBAdr(JBAdr), 																						// fetch data inputs
+		fetch FETCH(
+			.clk(clk), .rst(rst), 
+			.JBAdr(JBAdr), 																					// fetch data inputs
 			.Enable(ControlSignals_DECODE[7]), .Dump(Dump_FETCH), .stall(Stall), .BrJmpTaken(BrJmpTaken),	// fetch control inputs
-			.instr(Instr_FETCH), .PCplus2(PCplus2_FETCH)); 																						// fetch outputs
+			.instr(Instr_FETCH), .PCplus2(PCplus2_FETCH)													// fetch outputs
+		); 													
 		
 		// Decode
-		decode DECODE(.clk(clk), .rst(rst), .instr(Instr_DECODE), .instr_wb(Instr_WB), .RegData(RegData_WB),	// decode data inputs
-			.RegDst(ControlSignals_WB[3:2]), .RegWrite(ControlSignals_WB[1]), 									// decode control inputs
-			.Reg1(Reg1_DECODE), .Reg2(Reg2_DECODE), 															// ^^^^^^^^^^^^^^^^^^^^^
-			.JumpOffset(JumpOffset_DECODE), .Instr_Imm(Instr_Imm_DECODE), .Control(Control));					// decode outputs
+		decode DECODE(
+			.clk(clk), .rst(rst), 
+			.instr(Instr_DECODE), .instr_wb(Instr_WB), .RegData(RegData_WB),								// decode data inputs
+			.RegDst(ControlSignals_WB[3:2]), .RegWrite(ControlSignals_WB[1]), 								// decode control inputs
+			.Reg1(Reg1_DECODE), .Reg2(Reg2_DECODE), 														// decode outputs
+			.JumpOffset(JumpOffset_DECODE), .Instr_Imm(Instr_Imm_DECODE), .Control(Control)					// ^^^^^^^^^^^^^^
+		);					
 					
 		// Execute
-		execute EXECUTE(.clk(clk), .rst(rst), .Reg1(Reg1_EXECUTE), .Reg2(Reg2_EXECUTE), .JumpOffset(JumpOffset_EXECUTE), 
-			.PCplus2(PCplus2_EXECUTE), .Instr_Imm(Instr_Imm_EXECUTE), 																								// execute data inputs
-			.ExtMode(ControlSignals_EXECUTE[19]), .IType(ControlSignals_EXECUTE[18]), .Reg1Rev(ControlSignals_EXECUTE[17]), 
-			.Reg1Shift(ControlSignals_EXECUTE[16]), .Zero1(ControlSignals_EXECUTE[15]), .Zero2(ControlSignals_EXECUTE[14]), 
-			.ALUSrc(ControlSignals_EXECUTE[13]), .BrOp(ControlSignals_EXECUTE[23:21]), .Branch(ControlSignals_EXECUTE[12]), .JumpType(ControlSignals_EXECUTE[11]), 
-			.CompCarry(ControlSignals_EXECUTE[10]), .ALUComp(ControlSignals_EXECUTE[9]), .ALUOp(ControlSignals_EXECUTE[26:24]), 
-			.sign(ControlSignals_EXECUTE[8]), .BrOrJmp(ControlSignals_EXECUTE[20]),																					// execute control inputs
-			.ALUOut(ALUOut_EXECUTE), .DataOut(DataOut_EXECUTE), .JBAdr(JBAdr), .WriteData(WriteData_EXECUTE), .BrJmpTaken(BrJmpTaken)); 							// execute outputs (JBAdr ties directly to fetch)
+		execute EXECUTE(
+			.clk(clk), .rst(rst), 
+			.Reg1(Reg1_EXECUTE), .Reg2(Reg2_EXECUTE), .JumpOffset(JumpOffset_EXECUTE), 						// execute data inputs
+			.PCplus2(PCplus2_EXECUTE), .Instr_Imm(Instr_Imm_EXECUTE), 										// ^^^^^^^^^^^^^^^^^^^
+			.ExtMode(ControlSignals_EXECUTE[19]), .IType(ControlSignals_EXECUTE[18]),						// execute control inputs 
+			.Reg1Rev(ControlSignals_EXECUTE[17]), .Reg1Shift(ControlSignals_EXECUTE[16]), 					// ^^^^^^^^^^^^^^^^^^^^^^
+			.Zero1(ControlSignals_EXECUTE[15]), .Zero2(ControlSignals_EXECUTE[14]), 						// ^^^^^^^^^^^^^^^^^^^^^^
+			.ALUSrc(ControlSignals_EXECUTE[13]), .BrOp(ControlSignals_EXECUTE[23:21]), 						// ^^^^^^^^^^^^^^^^^^^^^^
+			.Branch(ControlSignals_EXECUTE[12]), .JumpType(ControlSignals_EXECUTE[11]), 					// ^^^^^^^^^^^^^^^^^^^^^^
+			.CompCarry(ControlSignals_EXECUTE[10]), .ALUComp(ControlSignals_EXECUTE[9]), 					// ^^^^^^^^^^^^^^^^^^^^^^
+			.ALUOp(ControlSignals_EXECUTE[26:24]), .sign(ControlSignals_EXECUTE[8]), 						// ^^^^^^^^^^^^^^^^^^^^^^
+			.BrOrJmp(ControlSignals_EXECUTE[20]),															// ^^^^^^^^^^^^^^^^^^^^^^
+			.ALUOut(ALUOut_EXECUTE), .DataOut(DataOut_EXECUTE), .JBAdr(JBAdr), 								// execute outputs (JBAdr ties directly to fetch)
+			.WriteData(WriteData_EXECUTE), .BrJmpTaken(BrJmpTaken)											// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+		); 							
 			
 		// Memory
-		memory MEMORY(.clk(clk), .rst(rst), .ALUOut(ALUOut_MEMORY), .WriteData(WriteData_MEMORY),						// memory data inputs
-			.MemWrite(ControlSignals_MEMORY[5]), .Enable(ControlSignals_MEMORY[7]), .Dump(ControlSignals_MEMORY[6]), 	// memory control inputs
-			.MemOut(MemOut_MEMORY)); 																					// memory outputs	
+		memory MEMORY(
+			.clk(clk), .rst(rst), .ALUOut(ALUOut_MEMORY), .WriteData(WriteData_MEMORY),						// memory data inputs
+			.MemWrite(ControlSignals_MEMORY[5]), .Enable(ControlSignals_MEMORY[7]), 						// memory control inputs
+			.Dump(ControlSignals_MEMORY[6]), 																// ^^^^^^^^^^^^^^^^^^^^^
+			.MemOut(MemOut_MEMORY)																			// memory outputs	
+		); 																									
 			
 		// Writeback
-		wb WRITEBACK(.clk(clk), .rst(rst), .DataOut(DataOut_WB), .MemOut(MemOut_WB), .PCplus2(PCplus2_WB), 	// wb data inputs
+		wb WRITEBACK(
+			.clk(clk), .rst(rst), .DataOut(DataOut_WB), .MemOut(MemOut_WB), .PCplus2(PCplus2_WB), 			// wb data inputs
 			.MemtoReg(ControlSignals_WB[4]), .AdrLink(ControlSignals_WB[0]), 								// wb control inputs
-			.RegData(RegData_WB));																			// wb outputs
+			.RegData(RegData_WB)																			// wb outputs
+		);																			
 			
 
 			
