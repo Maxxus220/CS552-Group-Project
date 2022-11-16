@@ -12,15 +12,18 @@ module fetch (clk, rst, JBAdr, Enable, Dump, stall, instr, PCplus2, BrJmpTaken);
 
       // clk/rst
       input clk, rst;
+
       // data inputs
       input [15:0] JBAdr; // from execute
-      //input BrEn;
+
       // control inputs
       input Enable, Dump, stall, BrJmpTaken;
+
       // data outputs
       output [15:0] instr; // to decode
       output [15:0] PCplus2; // to execute and wb
       
+      // wires
       wire [15:0] PC, newPC;
       wire [15:0] instr_fetch;
       wire dummy; // dummy wire for adder c_out (unused)
