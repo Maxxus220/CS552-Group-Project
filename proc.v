@@ -30,8 +30,8 @@ module proc (/*AUTOARG*/
    /* Instantiations of intermediary wires */
 
 	wire [15:0] JBAdr;
-	wire [15:0] instr_FETCH, instr_DECODE, instr_EXECUTE, instr_MEMORY, instr_WB;
-	wire [15:0] instr_DECODE_temp, instr_EXECUTE_temp, instr_MEMORY_temp, instr_WB_temp;
+	wire [15:0] Instr_FETCH, Instr_DECODE, Instr_EXECUTE, Instr_MEMORY, Instr_WB;
+	wire [15:0] Instr_DECODE_temp, Instr_EXECUTE_temp, Instr_MEMORY_temp, Instr_WB_temp;
 	wire [15:0] instr_IN; // Choice between normal instr and stall (nop)
 	wire [15:0] PCplus2_FETCH, PCplus2_DECODE, PCplus2_EXECUTE, PCplus2_MEMORY, PCplus2_WB;
 	wire [15:0] RegData_WB;
@@ -85,7 +85,7 @@ module proc (/*AUTOARG*/
 	/* Contains latches for data signals */
 
 	// Fetch/Decode	
-	dff FD_FF [31:0] (.q({PCplus2_DECODE,instr_DECODE_temp}), .d({PCplus2_FETCH,instr_IN}), .clk(clk), .rst(rst | BrJmpTaken));
+	dff FD_FF [31:0] (.q({PCplus2_DECODE,Instr_DECODE_temp}), .d({PCplus2_FETCH,instr_IN}), .clk(clk), .rst(rst | BrJmpTaken));
 	// Decode/Execute
    	dff DX_DATA_FF [71:0] (.q({instr_imm_EXECUTE,JumpOffset_EXECUTE,PCplus2_EXECUTE,Reg2_EXECUTE,Reg1_EXECUTE}), 
    						   .d({instr_imm_DECODE,JumpOffset_DECODE,PCplus2_DECODE,Reg2_DECODE,Reg1_DECODE}), 
@@ -106,13 +106,13 @@ module proc (/*AUTOARG*/
 	/* Contains "latches" for instructions */
 
    	// Fetch/Decode
-   	dff FD_Inst [15:0] (.q(instr_DECODE), .d((rst | BrJmpTaken) ? (16'h0800) : (instr_IN)), .clk(clk), .rst(1'b0));
+   	dff FD_Inst [15:0] (.q(Instr_DECODE), .d((rst | BrJmpTaken) ? (16'h0800) : (instr_IN)), .clk(clk), .rst(1'b0));
    	// Decode/Execute
-   	dff DX_Inst [15:0] (.q(instr_EXECUTE), .d((rst | BrJmpTaken) ? (16'h0800) : (instr_DECODE)), .clk(clk), .rst(1'b0));   	
+   	dff DX_Inst [15:0] (.q(Instr_EXECUTE), .d((rst | BrJmpTaken) ? (16'h0800) : (Instr_DECODE)), .clk(clk), .rst(1'b0));   	
    	// Execute/Memory
-   	dff XM_Inst [15:0] (.q(instr_MEMORY), .d((rst) ? (16'h0800) : (instr_EXECUTE)), .clk(clk), .rst(1'b0));   	
+   	dff XM_Inst [15:0] (.q(Instr_MEMORY), .d((rst) ? (16'h0800) : (Instr_EXECUTE)), .clk(clk), .rst(1'b0));   	
    	// Memory/Writeback
-   	dff MW_Inst [15:0] (.q(instr_WB), .d((rst) ? (16'h0800) : (instr_MEMORY)), .clk(clk), .rst(1'b0));
+   	dff MW_Inst [15:0] (.q(Instr_WB), .d((rst) ? (16'h0800) : (Instr_MEMORY)), .clk(clk), .rst(1'b0));
    	
 
 	//////////////////////////////////
@@ -123,16 +123,16 @@ module proc (/*AUTOARG*/
 	// Stall Block Module 
 	/* Checks for dependencies and inserts NOPs as needed
 	   Produces a stall command as well */
-	stallBlock STALL(.clk(clk), .rst(rst), .inst_If(instr_FETCH), .inst_IfId(instr_DECODE), .inst_IdEx(instr_EXECUTE), 
-	                 .inst_ExMem(instr_MEMORY), .inst_out(instr_IN), .stall(Stall));
+	stallBlock STALL(.clk(clk), .rst(rst), .inst_If(Instr_FETCH), .inst_IfId(Instr_DECODE), .inst_IdEx(Instr_EXECUTE), 
+	                 .inst_ExMem(Instr_MEMORY), .inst_out(instr_IN), .stall(Stall));
    
     // Fetch
 	fetch FETCH(.clk(clk), .rst(rst), .JBAdr(JBAdr), 																						// fetch data inputs
    		.PCVal(ControlSignals_EXECUTE[20]), .Enable(ControlSignals_DECODE[7]), .Dump(Dump_FETCH), .stall(Stall), .BrJmpTaken(BrJmpTaken),	// fetch control inputs
-   		.instr(instr_FETCH), .PCplus2(PCplus2_FETCH)); 																						// fetch outputs
+   		.instr(Instr_FETCH), .PCplus2(PCplus2_FETCH)); 																						// fetch outputs
    	
    	// Decode
-	decode DECODE(.clk(clk), .rst(rst), .instr(instr_DECODE), .instr_wb(instr_WB), .RegData(RegData_WB),	// decode data inputs
+	decode DECODE(.clk(clk), .rst(rst), .instr(Instr_DECODE), .instr_wb(Instr_WB), .RegData(RegData_WB),	// decode data inputs
    		 .RegDst(ControlSignals_WB[3:2]), .RegWrite(ControlSignals_WB[1]), 									// decode control inputs
    		 .Reg1(Reg1_DECODE), .Reg2(Reg2_DECODE), 															// ^^^^^^^^^^^^^^^^^^^^^
    		 .JumpOffset(JumpOffset_DECODE), .instr_imm(instr_imm_DECODE), .Control(Control));					// decode outputs
@@ -157,7 +157,7 @@ module proc (/*AUTOARG*/
    		.MemtoReg(ControlSignals_WB[4]), .AdrLink(ControlSignals_WB[0]), 								// wb control inputs
    		.RegData(RegData_WB));																			// wb outputs
    		
-   	assign Halt = ~(|instr_WB[15:11]);
+   	assign Halt = ~(|Instr_WB[15:11]);
    	
    	dff WF_CTRL_FF (.q(Dump_FETCH), .d(Halt), .clk(clk), .rst(rst));		
 
