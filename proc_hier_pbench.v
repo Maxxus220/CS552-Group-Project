@@ -33,13 +33,13 @@ module proc_hier_pbench();
    wire [15:0] JBAddr;
    wire [15:0] PCTwo_FETCH;
    wire [15:0] PCTwo_EXECUTE;
-   wire PCVal;
+   wire BrOrJmp;
    // FEIST wire assigns
    assign Branch = DUT.p0.EXECUTE.Branch;
    assign BranchEnable = DUT.p0.EXECUTE.BrEn;
    
    // assign JBAddr = DUT.p0.FETCH.;
-   // assign PCVal = DUT.p0.FETCH.;
+   // assign BrOrJmp = DUT.p0.FETCH.;
    assign PCTwo_FETCH = DUT.p0.FETCH.ADD2.sum;
    assign PCTwo_EXECUTE = DUT.p0.EXECUTE.PCplus2;
    
@@ -103,8 +103,8 @@ module proc_hier_pbench();
                    MemWrite,
                    MemAddress,
                    MemDataIn);
-        // $fdisplay(trace_file,"Instr: %d PC+2_FETCH: %h PC+2_EX: %h PCVal: %d JBAddr: %d",
-         	//	PC/2, PCTwo_FETCH, PCTwo_EXECUTE, PCVal, JBAddr);
+        // $fdisplay(trace_file,"Instr: %d PC+2_FETCH: %h PC+2_EX: %h BrOrJmp: %d JBAddr: %d",
+         	//	PC/2, PCTwo_FETCH, PCTwo_EXECUTE, BrOrJmp, JBAddr);
          			
          if (RegWrite) begin
             $fdisplay(trace_file,"REG: %d VALUE: 0x%04x",

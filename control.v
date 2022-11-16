@@ -22,7 +22,7 @@ module control(clk, rst, Control, ALUControl, ControlSignals);
 	// control outputs
 	output [26:0] ControlSignals;
 	
-	wire Enable, Dump, PCVal;
+	wire Enable, Dump, BrOrJmp;
  	wire [1:0] RegDst;
  	wire RegWrite;
  	wire ExtMode, IType, Reg1Rev, Reg1Shift, Zero1, Zero2, ALUSrc, Branch, Jump, CompCarry, ALUComp;
@@ -36,7 +36,7 @@ module control(clk, rst, Control, ALUControl, ControlSignals);
 	assign Enable = (rst ? 1'b1 : |Control); // equals 0 iff op = 00000
 	assign Dump = (rst ? 1'b0 : ~Enable); // equals 1 when memory is disabled
 	
-	assign PCVal = ~Control[4] & Control[2]; // 0x1xx
+	assign BrOrJmp = ~Control[4] & Control[2]; // 0x1xx
 	assign RegDst[0] = (~Control[4]) 		 // 0xxxx
 						| (~Control[3] & ~Control[1]) // x0x0x
 						| (~Control[3] & Control[2]); // x01xx
@@ -137,7 +137,7 @@ module control(clk, rst, Control, ALUControl, ControlSignals);
 		end
 	endcase
 	
-	assign ControlSignals = {ALUOp, BrOp, PCVal, ExtMode, IType, Reg1Rev, Reg1Shift, Zero1, Zero2, ALUSrc, Branch, Jump, CompCarry, ALUComp, sign,
+	assign ControlSignals = {ALUOp, BrOp, BrOrJmp, ExtMode, IType, Reg1Rev, Reg1Shift, Zero1, Zero2, ALUSrc, Branch, Jump, CompCarry, ALUComp, sign,
 			Enable, Dump, MemWrite, MemtoReg, RegDst, RegWrite, AdrLink};
 	
 endmodule

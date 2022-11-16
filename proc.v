@@ -138,7 +138,7 @@ module proc (/*AUTOARG*/
    		.Reg1Shift(ControlSignals_EXECUTE[16]), .Zero1(ControlSignals_EXECUTE[15]), .Zero2(ControlSignals_EXECUTE[14]), 
    		.ALUSrc(ControlSignals_EXECUTE[13]), .BrOp(ControlSignals_EXECUTE[23:21]), .Branch(ControlSignals_EXECUTE[12]), .JumpType(ControlSignals_EXECUTE[11]), 
    		.CompCarry(ControlSignals_EXECUTE[10]), .ALUComp(ControlSignals_EXECUTE[9]), .ALUOp(ControlSignals_EXECUTE[26:24]), 
-   		.sign(ControlSignals_EXECUTE[8]), .PCVal(ControlSignals_EXECUTE[20]),																					// execute control inputs
+   		.sign(ControlSignals_EXECUTE[8]), .BrOrJmp(ControlSignals_EXECUTE[20]),																					// execute control inputs
    		.ALUOut(ALUOut_EXECUTE), .DataOut(DataOut_EXECUTE), .JBAdr(JBAdr), .WriteData(WriteData_EXECUTE), .BrJmpTaken(BrJmpTaken)); 							// execute outputs (JBAdr ties directly to fetch)
    		
    	// Memory
