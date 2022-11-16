@@ -6,6 +6,8 @@
 */
 module fetch (clk, rst, JBAdr, Enable, Dump, stall, instr, PCplus2, BrJmpTaken);
 
+   
+
    // clk/rst
    input clk, rst;
    // data inputs
