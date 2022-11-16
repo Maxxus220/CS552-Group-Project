@@ -7,15 +7,27 @@
 */
 module memory (clk, rst, ALUOut, WriteData, Enable, Dump, MemWrite, MemOut);
 
-    // clk/rst
-   input clk, rst;
-   // data inputs
-   input [15:0] ALUOut, WriteData; // from execute
-   // control inputs
-   input Enable, Dump, MemWrite;
-   // data outputs
-   output [15:0] MemOut; // to wb
+//////////////
+// SIGNALS //
+////////////
+
+      // clk/rst
+      input clk, rst;
+
+      // data inputs
+      input [15:0] ALUOut, WriteData; // from execute
+
+      // control inputs
+      input Enable, Dump, MemWrite;
+
+      // data outputs
+      output [15:0] MemOut; // to wb
    
-   memory2c DMEM(.data_out(MemOut), .data_in(WriteData), .addr(ALUOut), .enable(Enable), .wr(MemWrite), .createdump(Dump), .clk(clk), .rst(rst));
+   
+//////////////
+// MODULES //
+////////////
+
+      memory2c DMEM(.data_out(MemOut), .data_in(WriteData), .addr(ALUOut), .enable(Enable), .wr(MemWrite), .createdump(Dump), .clk(clk), .rst(rst));
    
 endmodule
