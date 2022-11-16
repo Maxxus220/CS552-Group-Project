@@ -4,7 +4,7 @@
    Filename        : decode.v
    Description     : This is the module for the overall decode stage of the processor.
 */
-module decode (clk, rst, instr, instr_wb, RegData, RegDst, RegWrite, Reg1, Reg2, JumpOffset, instr_imm, Control);
+module decode (clk, rst, instr, instr_wb, RegData, RegDst, RegWrite, Reg1, Reg2, JumpOffset, Instr_Imm, Control);
 
 	// clk/rst
 	input clk, rst;
@@ -18,14 +18,14 @@ module decode (clk, rst, instr, instr_wb, RegData, RegDst, RegWrite, Reg1, Reg2,
 	// data outputs
 	output [15:0] Reg1, Reg2; // to execute
 	output [15:0] JumpOffset; // to execute
-	output [7:0] instr_imm; // to execute
+	output [7:0] Instr_Imm; // to execute
 	output [4:0] Control; // to control
 
 	wire err;
 	wire [2:0] WriteAdr;
 
 	assign Control = instr[15:11];
-	assign instr_imm = instr[7:0]; // these signals are passed to control block and exec block as is
+	assign Instr_Imm = instr[7:0]; // these signals are passed to control block and exec block as is
 
 	extend11_16 JMP_OFF(.out(JumpOffset), .in(instr[10:0]), .sel(1'b1)); // this block will never do zero-extension
 	mux3_4 MUX_RegDST(.out(WriteAdr), .in0(instr_wb[10:8]), .in1(instr_wb[7:5]), .in2(instr_wb[4:2]), .in3(3'h7), .sel(RegDst)); // select write register

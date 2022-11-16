@@ -4,7 +4,7 @@
    Filename        : execute.v
    Description     : This is the overall module for the execute stage of the processor.
 */
-module execute (clk, rst, Reg1, Reg2, JumpOffset, PCplus2, instr_imm, ExtMode, IType, Reg1Rev, Reg1Shift, 
+module execute (clk, rst, Reg1, Reg2, JumpOffset, PCplus2, Instr_Imm, ExtMode, IType, Reg1Rev, Reg1Shift, 
 				Zero1, Zero2, ALUSrc, BrOp, Branch, JumpType, CompCarry, ALUComp, ALUOp, sign, PCVal, ALUOut, DataOut, JBAdr, WriteData, BrJmpTaken);
 
 	// clk/rst
@@ -13,7 +13,7 @@ module execute (clk, rst, Reg1, Reg2, JumpOffset, PCplus2, instr_imm, ExtMode, I
 	input [15:0] Reg1, Reg2; // from decode
 	input [15:0] JumpOffset; // from decode
 	input [15:0] PCplus2; // from fetch
-	input [7:0] instr_imm; // from decode
+	input [7:0] Instr_Imm; // from decode
 	// control inputs
 	input ExtMode, IType, Reg1Rev, Reg1Shift, Zero1, Zero2, ALUSrc, Branch, JumpType, CompCarry, ALUComp;
 	input [2:0] ALUOp, BrOp;  
@@ -30,8 +30,8 @@ module execute (clk, rst, Reg1, Reg2, JumpOffset, PCplus2, instr_imm, ExtMode, I
 
 	// immediate calculation
 	wire [15:0] Imm8, Imm5, Imm;
-	extend8_16 EXT8(.out(Imm8), .in(instr_imm), .sel(ExtMode));
-	extend5_16 EXT5(.out(Imm5), .in(instr_imm[4:0]), .sel(ExtMode));
+	extend8_16 EXT8(.out(Imm8), .in(Instr_Imm), .sel(ExtMode));
+	extend5_16 EXT5(.out(Imm5), .in(Instr_Imm[4:0]), .sel(ExtMode));
 	mux16_2 MUX_IType(.out(Imm), .in0(Imm5), .in1(Imm8), .sel(IType));
 
 	// ALU operation
