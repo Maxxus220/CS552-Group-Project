@@ -4,7 +4,7 @@
    Filename        : fetch.v
    Description     : This is the module for the overall fetch stage of the processor.
 */
-module fetch (clk, rst, JBAdr, Enable, Dump, PCVal, stall, instr, PCplus2, BrJmpTaken);
+module fetch (clk, rst, JBAdr, Enable, Dump, stall, instr, PCplus2, BrJmpTaken);
 
    // clk/rst
    input clk, rst;
@@ -12,7 +12,7 @@ module fetch (clk, rst, JBAdr, Enable, Dump, PCVal, stall, instr, PCplus2, BrJmp
    input [15:0] JBAdr; // from execute
    //input BrEn;
    // control inputs
-   input Enable, Dump, PCVal, stall, BrJmpTaken;
+   input Enable, Dump, stall, BrJmpTaken;
    // data outputs
    output [15:0] instr; // to decode
    output [15:0] PCplus2; // to execute and wb

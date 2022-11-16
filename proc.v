@@ -122,7 +122,7 @@ module proc (/*AUTOARG*/
    
     // Fetch
 	fetch FETCH(.clk(clk), .rst(rst), .JBAdr(JBAdr), 																						// fetch data inputs
-   		.PCVal(ControlSignals_EXECUTE[20]), .Enable(ControlSignals_DECODE[7]), .Dump(Dump_FETCH), .stall(Stall), .BrJmpTaken(BrJmpTaken),	// fetch control inputs
+   		.Enable(ControlSignals_DECODE[7]), .Dump(Dump_FETCH), .stall(Stall), .BrJmpTaken(BrJmpTaken),	// fetch control inputs
    		.instr(Instr_FETCH), .PCplus2(PCplus2_FETCH)); 																						// fetch outputs
    	
    	// Decode
