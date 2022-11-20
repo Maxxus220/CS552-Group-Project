@@ -43,7 +43,6 @@ module proc (/*AUTOARG*/
 		wire [15:0] WriteData_EXECUTE, WriteData_MEMORY;
 		wire [15:0] MemOut_MEMORY, MemOut_WB;
 
-
 //////////////////////
 // CONTROL SIGNALS //
 ////////////////////
@@ -52,7 +51,8 @@ module proc (/*AUTOARG*/
 		wire [4:0]  Control;
 		wire [26:0] ControlSignals_DECODE, ControlSignals_EXECUTE, ControlSignals_MEMORY, ControlSignals_WB;
 
-		wire Stall;
+		wire fetch_stall, mem_stall;
+		wire sysclk1, sysclk2, sysclk;
 		wire Halt;
 		wire BrJmpTaken;
 	
@@ -63,14 +63,14 @@ module proc (/*AUTOARG*/
 /* Contains Control Block which generates control signals and latches for control signals */
 
 		// Control Block
-		control CONTROL(.clk(clk), .rst(rst), .Control(Control), .ALUControl(Instr_Imm_DECODE[1:0]), .ControlSignals(ControlSignals_DECODE));
+		control CONTROL(.clk(sysclk), .rst(rst), .Control(Control), .ALUControl(Instr_Imm_DECODE[1:0]), .ControlSignals(ControlSignals_DECODE));
 
 		// Decode/Execute
-		dff DX_FF [26:0] (.q({ControlSignals_EXECUTE}), .d({ControlSignals_DECODE}), .clk(clk), .rst(rst | BrJmpTaken));
+		dff DX_FF [26:0] (.q({ControlSignals_EXECUTE}), .d({ControlSignals_DECODE}), .clk(sysclk), .rst(rst | BrJmpTaken));
 		// Execute/Memory
-		dff XM_FF [26:0] (.q({ControlSignals_MEMORY}), .d({ControlSignals_EXECUTE}), .clk(clk), .rst(rst));
+		dff XM_FF [26:0] (.q({ControlSignals_MEMORY}), .d({ControlSignals_EXECUTE}), .clk(sysclk), .rst(rst));
 		// Memory/Write-Back
-		dff MW_FF [26:0] (.q({ControlSignals_WB}), .d({ControlSignals_MEMORY}), .clk(clk), .rst(rst));
+		dff MW_FF [26:0] (.q({ControlSignals_WB}), .d({ControlSignals_MEMORY}), .clk(sysclk), .rst(rst));
 	
 
 ///////////////////////////
@@ -79,19 +79,19 @@ module proc (/*AUTOARG*/
 /* Contains latches for data signals */
 
 		// Fetch/Decode	
-		dff FD_FF [31:0] (.q({PCplus2_DECODE,Instr_DECODE_temp}), .d({PCplus2_FETCH,Instr_IN}), .clk(clk), .rst(rst | BrJmpTaken));
+		dff FD_FF [31:0] (.q({PCplus2_DECODE,Instr_DECODE_temp}), .d({PCplus2_FETCH,Instr_IN}), .clk(sysclk), .rst(rst | BrJmpTaken));
 		// Decode/Execute
 		dff DX_DATA_FF [71:0] (.q({Instr_Imm_EXECUTE,JumpOffset_EXECUTE,PCplus2_EXECUTE,Reg2_EXECUTE,Reg1_EXECUTE}), 
 							.d({Instr_Imm_DECODE,JumpOffset_DECODE,PCplus2_DECODE,Reg2_DECODE,Reg1_DECODE}), 
-							.clk(clk), .rst(rst | BrJmpTaken));
+							.clk(sysclk), .rst(rst | BrJmpTaken));
 		// Execute/Memory
 		dff XM_DATA_FF [63:0] (.q({PCplus2_MEMORY,DataOut_MEMORY,WriteData_MEMORY,ALUOut_MEMORY}), 
 							.d({PCplus2_EXECUTE,DataOut_EXECUTE,WriteData_EXECUTE,ALUOut_EXECUTE}), 
-							.clk(clk), .rst(rst));   		
+							.clk(sysclk), .rst(rst));   		
 		// Memory/Writeback	
 		dff MW_DATA_FF [47:0] (.q({PCplus2_WB,MemOut_WB,DataOut_WB}), 
 							.d({PCplus2_MEMORY,MemOut_MEMORY,DataOut_MEMORY}), 
-							.clk(clk), .rst(rst));
+							.clk(sysclk), .rst(rst));
 
 
 ////////////////////////////
@@ -100,13 +100,13 @@ module proc (/*AUTOARG*/
 /* Contains "latches" for instructions */
 
 		// Fetch/Decode
-		dff FD_Inst [15:0] (.q(Instr_DECODE), .d((rst | BrJmpTaken) ? (16'h0800) : (Instr_IN)), .clk(clk), .rst(1'b0));
+		dff FD_Inst [15:0] (.q(Instr_DECODE), .d((rst | BrJmpTaken) ? (16'h0800) : (Instr_IN)), .clk(sysclk), .rst(1'b0));
 		// Decode/Execute
-		dff DX_Inst [15:0] (.q(Instr_EXECUTE), .d((rst | BrJmpTaken) ? (16'h0800) : (Instr_DECODE)), .clk(clk), .rst(1'b0));   	
+		dff DX_Inst [15:0] (.q(Instr_EXECUTE), .d((rst | BrJmpTaken) ? (16'h0800) : (Instr_DECODE)), .clk(sysclk), .rst(1'b0));   	
 		// Execute/Memory
-		dff XM_Inst [15:0] (.q(Instr_MEMORY), .d((rst) ? (16'h0800) : (Instr_EXECUTE)), .clk(clk), .rst(1'b0));   	
+		dff XM_Inst [15:0] (.q(Instr_MEMORY), .d((rst) ? (16'h0800) : (Instr_EXECUTE)), .clk(sysclk), .rst(1'b0));   	
 		// Memory/Writeback
-		dff MW_Inst [15:0] (.q(Instr_WB), .d((rst) ? (16'h0800) : (Instr_MEMORY)), .clk(clk), .rst(1'b0));
+		dff MW_Inst [15:0] (.q(Instr_WB), .d((rst) ? (16'h0800) : (Instr_MEMORY)), .clk(sysclk), .rst(1'b0));
    	
 
 //////////////////////////////////
@@ -118,22 +118,22 @@ module proc (/*AUTOARG*/
 		/* Checks for dependencies and inserts NOPs as needed
 		Produces a stall command as well */
 		stallBlock STALL(
-			.clk(clk), .rst(rst), 
+			.clk(sysclk), .rst(rst), 
 			.inst_If(Instr_FETCH), .inst_IfId(Instr_DECODE), .inst_IdEx(Instr_EXECUTE), 
 			.inst_ExMem(Instr_MEMORY), .inst_out(Instr_IN), .stall(Stall)
 		);
 	
 		// Fetch
 		fetch FETCH(
-			.clk(clk), .rst(rst), 
+			.clk(sysclk), .rst(rst), 
 			.JBAdr(JBAdr), 																					// fetch data inputs
-			.Enable(ControlSignals_DECODE[7]), .Dump(Dump_FETCH), .stall(Stall), .BrJmpTaken(BrJmpTaken),	// fetch control inputs
+			.Enable(ControlSignals_DECODE[7]), .Dump(Halt), .stall(Stall), .BrJmpTaken(BrJmpTaken),			// fetch control inputs
 			.instr(Instr_FETCH), .PCplus2(PCplus2_FETCH)													// fetch outputs
 		); 													
 		
 		// Decode
 		decode DECODE(
-			.clk(clk), .rst(rst), 
+			.clk(sysclk), .rst(rst), 
 			.instr(Instr_DECODE), .instr_wb(Instr_WB), .RegData(RegData_WB),								// decode data inputs
 			.RegDst(ControlSignals_WB[3:2]), .RegWrite(ControlSignals_WB[1]), 								// decode control inputs
 			.Reg1(Reg1_DECODE), .Reg2(Reg2_DECODE), 														// decode outputs
@@ -142,7 +142,7 @@ module proc (/*AUTOARG*/
 					
 		// Execute
 		execute EXECUTE(
-			.clk(clk), .rst(rst), 
+			.clk(sysclk), .rst(rst), 
 			.Reg1(Reg1_EXECUTE), .Reg2(Reg2_EXECUTE), .JumpOffset(JumpOffset_EXECUTE), 						// execute data inputs
 			.PCplus2(PCplus2_EXECUTE), .Instr_Imm(Instr_Imm_EXECUTE), 										// ^^^^^^^^^^^^^^^^^^^
 			.ExtMode(ControlSignals_EXECUTE[19]), .IType(ControlSignals_EXECUTE[18]),						// execute control inputs 
@@ -157,27 +157,29 @@ module proc (/*AUTOARG*/
 			.WriteData(WriteData_EXECUTE), .BrJmpTaken(BrJmpTaken)											// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 		); 							
 			
-		// Memory
+		// MemoryMemOut_ME
 		memory MEMORY(
-			.clk(clk), .rst(rst), .ALUOut(ALUOut_MEMORY), .WriteData(WriteData_MEMORY),						// memory data inputs
-			.MemWrite(ControlSignals_MEMORY[5]), .Enable(ControlSignals_MEMORY[7]), 						// memory control inputs
-			.Dump(ControlSignals_MEMORY[6]), 																// ^^^^^^^^^^^^^^^^^^^^^
-			.MemOut(MemOut_MEMORY)																			// memory outputs	
+			.clk(clk), .rst(rst), .ALUOut(ALUOut_MEMORY), .WriteData(WriteData_MEMORY),					// memory data inputs
+			.MemToReg(ControlSignals_MEMORY[4]), .MemWrite(ControlSignals_MEMORY[5]), 						// memory control inputs
+			.Enable(ControlSignals_MEMORY[7]), .Dump(ControlSignals_MEMORY[6]), 							// ^^^^^^^^^^^^^^^^^^^^^
+			.MemOut(MemOut_MEMORY), .stall(mem_stall)														// memory outputs	
 		); 																									
 			
 		// Writeback
 		wb WRITEBACK(
-			.clk(clk), .rst(rst), .DataOut(DataOut_WB), .MemOut(MemOut_WB), .PCplus2(PCplus2_WB), 			// wb data inputs
+			.clk(sysclk), .rst(rst), .DataOut(DataOut_WB), .MemOut(MemOut_WB), .PCplus2(PCplus2_WB), 		// wb data inputs
 			.MemtoReg(ControlSignals_WB[4]), .AdrLink(ControlSignals_WB[0]), 								// wb control inputs
 			.RegData(RegData_WB)																			// wb outputs
 		);																			
-			
-
-			
-		assign Halt = ~(|Instr_WB[15:11]);
 		
-		dff WF_CTRL_FF (.q(Dump_FETCH), .d(Halt), .clk(clk), .rst(rst));		
-
+		// Assign whether the program should propogate halts
+		dff WF_CTRL_FF (.q(Halt), .d((~(|Instr_WB[15:11]))), .clk(sysclk), .rst(rst));
+		
+		// Assign the system clock signal
+		// Utilize memWrite and MemToReg to determine memory operations
+		assign sysclk1 = (~fetch_stall) & clk;
+		assign sysclk2 = (ControlSignals_MEMORY[5] | ControlSignals_MEMORY[4]) ? ((~mem_stall) & clk) : (clk);
+		assign sysclk = sysclk2;
 
    				
 endmodule // proc
