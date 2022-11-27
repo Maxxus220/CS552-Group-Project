@@ -159,7 +159,7 @@ module proc (/*AUTOARG*/
 			
 		// MemoryMemOut_ME
 		memory MEMORY(
-			.clk(clk), .rst(rst), .ALUOut(ALUOut_MEMORY), .WriteData(WriteData_MEMORY),					// memory data inputs
+			.clk(clk), .rst(rst), .ALUOut(ALUOut_MEMORY), .WriteData(WriteData_MEMORY),						// memory data inputs
 			.MemToReg(ControlSignals_MEMORY[4]), .MemWrite(ControlSignals_MEMORY[5]), 						// memory control inputs
 			.Enable(ControlSignals_MEMORY[7]), .Dump(ControlSignals_MEMORY[6]), 							// ^^^^^^^^^^^^^^^^^^^^^
 			.MemOut(MemOut_MEMORY), .stall(mem_stall)														// memory outputs	

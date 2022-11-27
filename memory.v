@@ -33,6 +33,6 @@ module memory (clk, rst, ALUOut, WriteData, Enable, Dump, MemToReg, MemWrite, Me
 
       // memory2c DMEM(.data_out(MemOut), .data_in(WriteData), .addr(ALUOut), .enable(Enable), .wr(MemWrite), .createdump(Dump), .clk(clk), .rst(rst));
       
-      four_bank_mem DRAM(.clk(clk), .rst(rst), .createdump(Dump), .addr(ALUOut), .data_in(WriteData), .wr(MemWrite), .rd(MemToReg), .data_out(MemOut), .stall(stall), .busy(busy), .err(err));
+      four_bank_mem DRAM(.clk(clk), .rst(rst), .createdump(Dump), .addr(ALUOut), .data_in(WriteData), .wr(MemWrite & Enable), .rd(MemToReg & Enable), .data_out(MemOut), .stall(stall), .busy(busy), .err(err));
    
 endmodule
