@@ -45,7 +45,7 @@ to set next_state
             case (cur_state)
 
                 // WAIT
-                0: begin
+                3'd0: begin
                     assign enable = 1'b0;
                     assign comp = 1'b0;
                     assign write = 1'b0;
@@ -58,7 +58,7 @@ to set next_state
                 end
                 
                 // COMP_R
-                1: begin
+                3'd1: begin
                     assign enable = 1'b0;
                     assign comp = 1'b0;
                     assign write = 1'b0;
@@ -71,7 +71,7 @@ to set next_state
                 end
 
                 // ACCESS_W
-                2: begin
+                3'd2: begin
                     assign enable = 1'b0;
                     assign comp = 1'b0;
                     assign write = 1'b0;
@@ -84,7 +84,7 @@ to set next_state
                 end
 
                 // COMP_W
-                3: begin
+                3'd3: begin
                     assign enable = 1'b0;
                     assign comp = 1'b0;
                     assign write = 1'b0;
@@ -97,7 +97,7 @@ to set next_state
                 end 
 
                 // CACHE_+_DIRECT
-                4: begin
+                3'd4: begin
                     assign enable = 1'b0;
                     assign comp = 1'b0;
                     assign write = 1'b0;
@@ -110,7 +110,7 @@ to set next_state
                 end
 
                 // DIRECT_MEM
-                5: begin
+                3'd5: begin
                     assign enable = 1'b0;
                     assign comp = 1'b0;
                     assign write = 1'b0;
@@ -119,7 +119,7 @@ to set next_state
                     assign valid_in = 1'b0;
                     assign done = 1'b0;
 
-                    
+
                 end
 
                 default: 
