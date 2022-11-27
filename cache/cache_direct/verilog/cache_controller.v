@@ -6,13 +6,31 @@ module cache_controller(
 ////////////
 // PORTS //
 //////////
-        input rd, wr, hit, dirty, valid;
-        input [3:0] busy;
-        input [2:0] offset;
+        input 
+            rd,         // Load instruction
+            wr,         // Store instruction
+            hit,        // Cache tag matches
+            dirty,      // Accessed line is dirty
+            valid;      // Accessed line is valid
 
-        input clk, rst;
+        input [3:0] 
+            busy;       // Busy status of four main mem banks
 
-        output enable, comp, write, mem_wr, mem_rd, valid_in, done;
+        input [2:0] 
+            offset;     // Last 3 bits of cache access addr
+
+        input 
+            clk,        // Clock signal
+            rst;        // Reset signal
+
+        output 
+            enable,     // Enable for cache
+            comp,       // Comp signal for cache
+            write,      // Write signal for cache
+            mem_wr,     // Write for main mem (Serves as direct_wr as well from our diagram)
+            mem_rd,     // Read for main mem
+            valid_in,   // Value to set for valid when writing to cache
+            done;       // Done signal (only positive for one cycle)
 
 ////////////
 // WIRES //
@@ -122,7 +140,9 @@ to set next_state
                     assign next_state = (|busy ? 5 : 0);
                 end
 
-                default: 
+                default: begin
+                    // TODO
+                end
             endcase
         end
 
