@@ -80,20 +80,20 @@ to set next_state
                     assign valid_in = 1'b1;
                     assign done = 1'b0;
 
-                    assign next_state = (|busy ? 2 : 1)
+                    assign next_state = (|busy ? 2 : 1);
                 end
 
                 // COMP_W
                 3'd3: begin
-                    assign enable = 1'b0;
-                    assign comp = 1'b0;
-                    assign write = 1'b0;
+                    assign enable = 1'b1;
+                    assign comp = 1'b1;
+                    assign write = 1'b1;
                     assign mem_wr = 1'b0;
                     assign mem_rd = 1'b0;
                     assign valid_in = 1'b0;
                     assign done = 1'b0;
 
-
+                    assign next_state = ((hit & valid) ? 4 : 5);
                 end 
 
                 // CACHE_+_DIRECT
