@@ -59,15 +59,15 @@ to set next_state
                 
                 // COMP_R
                 3'd1: begin
-                    assign enable = 1'b0;
-                    assign comp = 1'b0;
+                    assign enable = 1'b1;
+                    assign comp = 1'b1;
                     assign write = 1'b0;
                     assign mem_wr = 1'b0;
                     assign mem_rd = 1'b0;
                     assign valid_in = 1'b0;
-                    assign done = 1'b0;
+                    assign done = (hit & valid);
 
-
+                    assign next_state = ((hit & valid) ? 0 : 2);
                 end
 
                 // ACCESS_W
