@@ -59,27 +59,67 @@ to set next_state
                 
                 // COMP_R
                 1: begin
+                    assign enable = 1'b0;
+                    assign comp = 1'b0;
+                    assign write = 1'b0;
+                    assign mem_wr = 1'b0;
+                    assign mem_rd = 1'b0;
+                    assign valid_in = 1'b0;
+                    assign done = 1'b0;
+
 
                 end
 
                 // ACCESS_W
                 2: begin
+                    assign enable = 1'b0;
+                    assign comp = 1'b0;
+                    assign write = 1'b0;
+                    assign mem_wr = 1'b0;
+                    assign mem_rd = 1'b0;
+                    assign valid_in = 1'b0;
+                    assign done = 1'b0;
+
 
                 end
 
                 // COMP_W
                 3: begin
+                    assign enable = 1'b0;
+                    assign comp = 1'b0;
+                    assign write = 1'b0;
+                    assign mem_wr = 1'b0;
+                    assign mem_rd = 1'b0;
+                    assign valid_in = 1'b0;
+                    assign done = 1'b0;
+
 
                 end 
 
                 // CACHE_+_DIRECT
                 4: begin
+                    assign enable = 1'b0;
+                    assign comp = 1'b0;
+                    assign write = 1'b0;
+                    assign mem_wr = 1'b0;
+                    assign mem_rd = 1'b0;
+                    assign valid_in = 1'b0;
+                    assign done = 1'b0;
+
 
                 end
 
                 // DIRECT_MEM
                 5: begin
+                    assign enable = 1'b0;
+                    assign comp = 1'b0;
+                    assign write = 1'b0;
+                    assign mem_wr = 1'b0;
+                    assign mem_rd = 1'b0;
+                    assign valid_in = 1'b0;
+                    assign done = 1'b0;
 
+                    
                 end
 
                 default: 
