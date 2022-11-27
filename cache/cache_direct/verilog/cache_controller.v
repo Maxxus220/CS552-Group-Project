@@ -72,15 +72,15 @@ to set next_state
 
                 // ACCESS_W
                 3'd2: begin
-                    assign enable = 1'b0;
+                    assign enable = 1'b1;
                     assign comp = 1'b0;
-                    assign write = 1'b0;
+                    assign write = 1'b1;
                     assign mem_wr = 1'b0;
-                    assign mem_rd = 1'b0;
-                    assign valid_in = 1'b0;
+                    assign mem_rd = 1'b1;
+                    assign valid_in = 1'b1;
                     assign done = 1'b0;
 
-
+                    assign next_state = (|busy ? 2 : 1)
                 end
 
                 // COMP_W
