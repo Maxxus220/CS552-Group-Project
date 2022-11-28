@@ -36,27 +36,27 @@ ctrl  = controller
 Format: <wire_name>_<c0/m/ctrl>
 */
 
-wire 
-   // Cache Zero
-   tag_out_c0,
-   hit_c0,
-   dirty_c0,
-   valid_c0,
-   err_c0,
+      wire 
+         // Cache Zero
+         tag_out_c0,
+         hit_c0,
+         dirty_c0,
+         valid_c0,
+         err_c0,
 
-   //Main Memory
-   data_out_m,
-   stall_m,
-   busy_m,
-   err_m,
+         //Main Memory
+         data_out_m,
+         stall_m,
+         busy_m,
+         err_m,
 
-   //Controller
-   enable_ctrl,
-   comp_ctrl,
-   write_ctrl,
-   mem_wr_ctrl,
-   mem_rd_ctrl,
-   valid_in_ctrl;
+         //Controller
+         enable_ctrl,
+         comp_ctrl,
+         write_ctrl,
+         mem_wr_ctrl,
+         mem_rd_ctrl,
+         valid_in_ctrl;
 
 
 //////////////
@@ -74,17 +74,17 @@ wire
                            .valid                (valid_c0),
                            .err                  (err_c0),
                            // Inputs
-                           .enable               (),
+                           .enable               (enable_ctrl),
                            .clk                  (clk),
                            .rst                  (rst),
-                           .createdump           (),
-                           .tag_in               (),
-                           .index                (),
-                           .offset               (),
+                           .createdump           (createdump),
+                           .tag_in               (Addr[15:11]),
+                           .index                (Addr[10:3]),
+                           .offset               (Addr[2:0]),
                            .data_in              (),
-                           .comp                 (),
-                           .write                (),
-                           .valid_in             ());
+                           .comp                 (comp_ctrl),
+                           .write                (write_ctrl),
+                           .valid_in             (valid_in_ctrl));
 
       four_bank_mem mem(// Outputs
                         .data_out          (data_out_m),
@@ -94,11 +94,11 @@ wire
                         // Inputs
                         .clk               (clk),
                         .rst               (rst),
-                        .createdump        (),
-                        .addr              (),
+                        .createdump        (createdump),
+                        .addr              (Addr),
                         .data_in           (),
-                        .wr                (),
-                        .rd                ());
+                        .wr                (mem_wr_ctrl),
+                        .rd                (mem_rd_ctrl));
 
       // your code here
       cache_controller ctrl(//Outputs
@@ -110,13 +110,13 @@ wire
                            .valid_in  (valid_in_ctrl),
                            .done      (Done),
                            //Inputs
-                           .rd        (),
-                           .wr        (),
-                           .hit       (),
-                           .dirty     (),
-                           .valid     (),
-                           .busy      (),
-                           .offset    (),
+                           .rd        (Rd),
+                           .wr        (Wr),
+                           .hit       (hit_c0),
+                           .dirty     (dirty_c0),
+                           .valid     (valid_c0),
+                           .busy      (busy_m),
+                           .offset    (Addr[2:0]),
                            .clk       (clk),
                            .rst       (rst))
 
