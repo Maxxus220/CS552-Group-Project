@@ -67,12 +67,12 @@ wire
       * needed for cache parameter */
       parameter memtype = 0;
       cache #(0 + memtype) c0(// Outputs
-                           .tag_out              (),
+                           .tag_out              (tag_out_c0),
                            .data_out             (DataOut),
-                           .hit                  (),
-                           .dirty                (),
-                           .valid                (),
-                           .err                  (),
+                           .hit                  (hit_c0),
+                           .dirty                (dirty_c0),
+                           .valid                (valid_c0),
+                           .err                  (err_c0),
                            // Inputs
                            .enable               (),
                            .clk                  (clk),
@@ -87,10 +87,10 @@ wire
                            .valid_in             ());
 
       four_bank_mem mem(// Outputs
-                        .data_out          (),
-                        .stall             (),
-                        .busy              (),
-                        .err               (),
+                        .data_out          (data_out_m),
+                        .stall             (stall_m),
+                        .busy              (busy_m),
+                        .err               (err_m),
                         // Inputs
                         .clk               (clk),
                         .rst               (rst),
@@ -102,12 +102,12 @@ wire
 
       // your code here
       cache_controller ctrl(//Outputs
-                           .enable    (),
-                           .comp      (),
-                           .write     (),
-                           .mem_wr    (),
-                           .mem_rd    (),
-                           .valid_in  (),
+                           .enable    (enable_ctrl),
+                           .comp      (comp_ctrl),
+                           .write     (write_ctrl),
+                           .mem_wr    (mem_wr_ctrl),
+                           .mem_rd    (mem_rd_ctrl),
+                           .valid_in  (valid_in_ctrl),
                            .done      (Done),
                            //Inputs
                            .rd        (),
