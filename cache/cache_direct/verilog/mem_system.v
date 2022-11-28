@@ -75,24 +75,24 @@ ctrl  = controller
       * needed for cache parameter */
       parameter memtype = 0;
       cache #(0 + memtype) c0(// Outputs
-                           .tag_out              (tag_out_c0),
-                           .data_out             (data_out_c0),
-                           .hit                  (hit_c0),
-                           .dirty                (dirty_c0),
-                           .valid                (valid_c0),
-                           .err                  (err_c0),
-                           // Inputs
-                           .enable               (enable_ctrl),
-                           .clk                  (clk),
-                           .rst                  (rst),
-                           .createdump           (createdump),
-                           .tag_in               (Addr[15:11]),
-                           .index                (Addr[10:3]),
-                           .offset               (Addr[2:0]),
-                           .data_in              (data_in_c0),
-                           .comp                 (comp_ctrl),
-                           .write                (write_ctrl),
-                           .valid_in             (valid_in_ctrl));
+                              .tag_out              (tag_out_c0),
+                              .data_out             (data_out_c0),
+                              .hit                  (hit_c0),
+                              .dirty                (dirty_c0),
+                              .valid                (valid_c0),
+                              .err                  (err_c0),
+                              // Inputs
+                              .enable               (enable_ctrl),
+                              .clk                  (clk),
+                              .rst                  (rst),
+                              .createdump           (createdump),
+                              .tag_in               (Addr[15:11]),
+                              .index                (Addr[10:3]),
+                              .offset               (Addr[2:0]),
+                              .data_in              (data_in_c0),
+                              .comp                 (comp_ctrl),
+                              .write                (write_ctrl),
+                              .valid_in             (valid_in_ctrl));
 
       four_bank_mem mem(// Outputs
                         .data_out          (data_out_m),
