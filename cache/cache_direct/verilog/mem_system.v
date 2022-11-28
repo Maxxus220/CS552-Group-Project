@@ -12,6 +12,7 @@ module mem_system(/*AUTOARG*/
 ////////////
 // PORTS //
 //////////
+
       input [15:0] Addr;
       input [15:0] DataIn;
       input        Rd;
@@ -25,6 +26,7 @@ module mem_system(/*AUTOARG*/
       output Stall;
       output CacheHit;
       output err;
+
 
 ////////////
 // WIRES //
@@ -58,6 +60,7 @@ ctrl  = controller
       wire         mem_wr_ctrl;
       wire         mem_rd_ctrl;
       wire         valid_in_ctrl;
+      wire         done_ctrl;  
 
       //Mux Wires
       wire [15:0] data_in_c0,
@@ -112,7 +115,7 @@ ctrl  = controller
                            .mem_wr    (mem_wr_ctrl),
                            .mem_rd    (mem_rd_ctrl),
                            .valid_in  (valid_in_ctrl),
-                           .done      (Done),
+                           .done      (done_ctrl),
                            //Inputs
                            .rd        (Rd),
                            .wr        (Wr),
@@ -129,6 +132,17 @@ ctrl  = controller
 
       // Data-In Main Memory Mux
       assign data_in_m = (mem_wr ? DataIn : data_out_c0);
+
+
+/////////////
+// OUTPUT //
+///////////
+
+      assign DataOut = data_out_c0;
+      assign Done = done_ctrl;
+      assign Stall = stall_m;
+      assign CacheHit = /*TODO*/;
+      assign err = err_c0 | err_m;
    
 endmodule // mem_system
 
