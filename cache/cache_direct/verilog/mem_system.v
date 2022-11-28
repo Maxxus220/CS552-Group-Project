@@ -62,7 +62,7 @@ ctrl  = controller
       wire         valid_in_ctrl;
       wire         done_ctrl;  
 
-      //Mux Wires
+      //Data-In Mux Wires
       wire [15:0] data_in_c0,
       wire [15:0] data_in_m;
 
