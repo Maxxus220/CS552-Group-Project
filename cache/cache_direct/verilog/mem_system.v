@@ -37,27 +37,31 @@ m     = main mem
 ctrl  = controller
 */
 
-      wire 
-         // Cache Zero
-         tag_out_c0,
-         hit_c0,
-         dirty_c0,
-         valid_c0,
-         err_c0,
+      // Cache Zero
+      wire [4:0]    tag_out_c0;
+      wire [15:0]   data_out_c0;
+      wire          hit_c0;
+      wire          dirty_c0;
+      wire          valid_c0;
+      wire          err_c0;
 
-         //Main Memory
-         data_out_m,
-         stall_m,
-         busy_m,
-         err_m,
+      //Main Memory
+      wire [15:0]   data_out_m;
+      wire          stall_m;
+      wire [3:0]    busy_m;
+      wire          err_m;
 
-         //Controller
-         enable_ctrl,
-         comp_ctrl,
-         write_ctrl,
-         mem_wr_ctrl,
-         mem_rd_ctrl,
-         valid_in_ctrl;
+      //Controller
+      wire         enable_ctrl;
+      wire         comp_ctrl;
+      wire         write_ctrl;
+      wire         mem_wr_ctrl;
+      wire         mem_rd_ctrl;
+      wire         valid_in_ctrl;
+
+      //Mux Wires
+      wire [15:0] data_in_c0,
+      wire [15:0] data_in_m;
 
 
 //////////////
@@ -69,7 +73,7 @@ ctrl  = controller
       parameter memtype = 0;
       cache #(0 + memtype) c0(// Outputs
                            .tag_out              (tag_out_c0),
-                           .data_out             (DataOut),
+                           .data_out             (data_out_c0),
                            .hit                  (hit_c0),
                            .dirty                (dirty_c0),
                            .valid                (valid_c0),
@@ -82,7 +86,7 @@ ctrl  = controller
                            .tag_in               (Addr[15:11]),
                            .index                (Addr[10:3]),
                            .offset               (Addr[2:0]),
-                           .data_in              (),
+                           .data_in              (data_in_c0),
                            .comp                 (comp_ctrl),
                            .write                (write_ctrl),
                            .valid_in             (valid_in_ctrl));
@@ -97,11 +101,10 @@ ctrl  = controller
                         .rst               (rst),
                         .createdump        (createdump),
                         .addr              (Addr),
-                        .data_in           (),
+                        .data_in           (data_in_m),
                         .wr                (mem_wr_ctrl),
                         .rd                (mem_rd_ctrl));
 
-      // your code here
       cache_controller ctrl(//Outputs
                            .enable    (enable_ctrl),
                            .comp      (comp_ctrl),
@@ -119,8 +122,13 @@ ctrl  = controller
                            .busy      (busy_m),
                            .offset    (Addr[2:0]),
                            .clk       (clk),
-                           .rst       (rst))
+                           .rst       (rst));
 
+      // Data-In Cache Zero Mux
+      assign data_in_c0 = (~comp_ctrl ? data_out_m : DataIn);
+
+      // Data-In Main Memory Mux
+      assign data_in_m = (mem_wr ? DataIn : data_out_c0);
    
 endmodule // mem_system
 
