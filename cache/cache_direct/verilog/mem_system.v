@@ -30,10 +30,11 @@ module mem_system(/*AUTOARG*/
 // WIRES //
 //////////
 /*
+Format: <wire_name>_<c0/m/ctrl>
+
 c0    = cache zero
 m     = main mem
 ctrl  = controller
-Format: <wire_name>_<c0/m/ctrl>
 */
 
       wire 
