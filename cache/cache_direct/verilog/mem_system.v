@@ -136,6 +136,7 @@ ctrl  = controller
                            .valid     (valid_c0),
                            .busy      (busy_m),
                            .offset    (Addr[2:0]),
+                           .stall     (stall_m),
                            .clk       (clk),
                            .rst       (rst));
 
@@ -148,7 +149,7 @@ ctrl  = controller
       assign data_in_c0 = (~comp_ctrl ? data_out_m : DataIn);
 
       // Data-In Main Memory Mux
-      assign data_in_m = (mem_wr ? DataIn : data_out_c0);
+      assign data_in_m = (mem_wr_ctrl ? DataIn : data_out_c0);
 
 
 //////////////////
