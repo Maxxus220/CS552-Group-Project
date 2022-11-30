@@ -1,7 +1,7 @@
 module cache_controller(
-    rd, wr, hit, dirty, valid, busy, offset, stall,                     // Inputs
+    rd, wr, hit, dirty, valid, busy, offset, stall_in,                     // Inputs
     enable, comp, write, mem_wr, mem_rd, valid_in, cache_hit, done,     // Outputs
-    word_m, word_c, stall,                                              // ^^^^^^^
+    word_m, word_c, stall_out,                                              // ^^^^^^^
     clk, rst);                                                          // Clk & Rst
 
 ////////////
@@ -13,7 +13,7 @@ module cache_controller(
             hit,        // Cache tag matches
             dirty,      // Accessed line is dirty
             valid,      // Accessed line is valid
-            stall;      // Stall from mem
+            stall_in;      // Stall from mem
 
         input [3:0] 
             busy;       // Busy status of four main mem banks
@@ -33,7 +33,7 @@ module cache_controller(
             mem_rd,     // Read for main mem
             valid_in,   // Value to set for valid when writing to cache
             cache_hit,  // Whether cache_hit achieved without accessing main mem
-            stall,      // Whether to stall
+            stall_out,      // Whether to stall
             done;       // Done signal (only positive for one cycle)
 
         output reg [1:0] 
@@ -97,7 +97,7 @@ module cache_controller(
                     cache_hit    = ((rd | wr) ? (hit & valid) : 1'b0);
                     word_m       = offset[2:1];
                     word_c       = offset[2:1];
-                    stall        = (rd ? (!(hit & valid))) : (wr ? 1'b1 : 1'b0);
+                    stall_out        = (rd ? (!(hit & valid))) : (wr ? 1'b1 : 1'b0);
 
 
                     next_state = (rd ? ((hit & valid) ? 4'd0 : 4'd2) : // Read
@@ -121,7 +121,7 @@ module cache_controller(
                     done         = (hit & valid);
                     word_m       = offset[2:1];
                     word_c       = offset[2:1];
-                    stall        = 1'b0;
+                    stall_out        = 1'b0;
 
 
                     next_state = ((hit & valid) ? 4'd0 : 4'd2);
@@ -154,7 +154,7 @@ module cache_controller(
                     done         = 1'b0;
                     word_m       = 2'b00;
                     word_c       = offset[2:1];
-                    stall        = 1'b1;
+                    stall_out        = 1'b1;
 
                     next_state = 4'd3;
                 end
@@ -173,7 +173,7 @@ module cache_controller(
                     done         = 1'b0;
                     word_m       = 2'b01;
                     word_c       = offset[2:1];
-                    stall        = 1'b1;
+                    stall_out        = 1'b1;
 
                     next_state = 4'd4;
                 end
@@ -193,7 +193,7 @@ module cache_controller(
                     done         = 1'b0;
                     word_m       = 2'b10;
                     word_c       = 2'b00;
-                    stall        = 1'b1;
+                    stall_out        = 1'b1;
 
                     next_state = 4'd5;
                 end
@@ -213,7 +213,7 @@ module cache_controller(
                     done         = 1'b0;
                     word_m       = 2'b11;
                     word_c       = 2'b01;
-                    stall        = 1'b1;
+                    stall_out        = 1'b1;
 
                     next_state = 4'd6;
                 end
@@ -232,7 +232,7 @@ module cache_controller(
                     done         = 1'b0;
                     word_m       = offset[2:1];
                     word_c       = 2'b10;
-                    stall        = 1'b1;
+                    stall_out        = 1'b1;
 
                     next_state = 4'd7;
                 end
@@ -251,7 +251,7 @@ module cache_controller(
                     done         = 1'b0;
                     word_m       = offset[2:1];
                     word_c       = 2'b11;
-                    stall        = 1'b1;
+                    stall_out        = 1'b1;
 
                     next_state = 4'd1;
                 end
@@ -281,7 +281,7 @@ module cache_controller(
                     done         = 1'b0;
                     word_m       = offset[2:1];
                     word_c       = offset[2:1];
-                    stall        = 1'b1;
+                    stall_out        = 1'b1;
 
                     next_state = 4'd10;
                 end
@@ -297,7 +297,7 @@ module cache_controller(
                     done         = 1'b0;
                     word_m       = offset[2:1];
                     word_c       = offset[2:1];
-                    stall        = 1'b1;
+                    stall_out        = 1'b1;
 
                     next_state = 4'd10;
                 end
@@ -313,7 +313,7 @@ module cache_controller(
                     done         = ~(|busy);
                     word_m       = offset[2:1];
                     word_c       = offset[2:1];
-                    stall        = |busy;
+                    stall_out        = |busy;
 
                     next_state = (|busy ? 4'd10 : 4'd0);
                 end

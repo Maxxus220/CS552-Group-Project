@@ -129,7 +129,7 @@ ctrl  = controller
                            .word_c    (word_c_ctrl),
                            .word_m    (word_m_ctrl),
                            .cache_hit (cache_hit_ctrl),
-                           .stall     (stall_ctrl),
+                           .stall_out (stall_ctrl),
                            //Inputs
                            .rd        (Rd),
                            .wr        (Wr),
@@ -138,7 +138,7 @@ ctrl  = controller
                            .valid     (valid_c0),
                            .busy      (busy_m),
                            .offset    (Addr[2:0]),
-                           .stall     (stall_m),
+                           .stall_in  (stall_m),
                            .clk       (clk),
                            .rst       (rst));
 
