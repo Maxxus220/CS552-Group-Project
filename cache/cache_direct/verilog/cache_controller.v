@@ -61,6 +61,7 @@ module cache_controller(
     AccessW_5    = 7
     Cache+Direct = 8
     DirectMem    = 9
+    WaitMemWrite = 10
 */
         dff STATE [3:0] (.q(cur_state), .d(next_state), .clk(clk), .rst(rst));
 
@@ -290,7 +291,7 @@ module cache_controller(
                     next_state = 4'd10;
                 end
 
-                // WAIT MEM_WRITE
+                // WAIT_MEM_WRITE
                 4'd10: begin
                     enable       = 1'b0;
                     comp         = 1'b0;

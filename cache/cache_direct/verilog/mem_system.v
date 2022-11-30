@@ -169,7 +169,7 @@ ctrl  = controller
 
       assign DataOut = data_out_c0;
       assign Done = done_ctrl;
-      assign Stall = stall_m;
+      assign Stall = ~done_ctrl;
       assign CacheHit = cache_hit_ctrl;
       assign err = err_c0 | err_m;
    
