@@ -280,22 +280,6 @@ module cache_controller(
                     mem_wr       = 1'b0;
                     mem_rd       = 1'b0;
                     valid_in     = 1'b1;
-                    done         = 1'b0;
-                    word_m       = offset[2:1];
-                    word_c       = offset[2:1];
-                    stall_out        = 1'b1;
-
-                    next_state = 4'd12;
-                end
-
-                // CACHE_WRITE_DONE
-                4'd12: begin
-                    enable       = 1'b0;
-                    comp         = 1'b0;
-                    write        = 1'b0;
-                    mem_wr       = 1'b0;
-                    mem_rd       = 1'b0;
-                    valid_in     = 1'b0;
                     done         = 1'b1;
                     word_m       = offset[2:1];
                     word_c       = offset[2:1];
