@@ -268,11 +268,11 @@ module cache_controller(
                     mem_wr       = 1'b1;
                     mem_rd       = 1'b0;
                     valid_in     = 1'b0;
-                    done         = ~(stall);
+                    done         = 1'b0;
                     word_m       = offset[2:1];
                     word_c       = offset[2:1];
 
-                    next_state = (stall ? 4'd8 : 4'd0);
+                    next_state = 4'd10;
                 end
 
                 // DIRECT_MEM
@@ -283,11 +283,26 @@ module cache_controller(
                     mem_wr       = 1'b1;
                     mem_rd       = 1'b0;
                     valid_in     = 1'b0;
-                    done         = ~(stall);
+                    done         = 1'b0;
                     word_m       = offset[2:1];
                     word_c       = offset[2:1];
 
-                    next_state = (stall ? 4'd9 : 4'd0);
+                    next_state = 4'd10;
+                end
+
+                // WAIT MEM_WRITE
+                4'd10: begin
+                    enable       = 1'b0;
+                    comp         = 1'b0;
+                    write        = 1'b0;
+                    mem_wr       = 1'b0;
+                    mem_rd       = 1'b0;
+                    valid_in     = 1'b0;
+                    done         = ~(|busy);
+                    word_m       = offset[2:1];
+                    word_c       = offset[2:1];
+
+                    next_state = (|busy ? 4'd10 : 4'd0);
                 end
 
                 default: begin
