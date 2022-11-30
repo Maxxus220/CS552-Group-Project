@@ -47,13 +47,13 @@ ctrl  = controller
       wire          valid_c0;
       wire          err_c0;
 
-      //Main Memory
+      // Main Memory
       wire [15:0]   data_out_m;
       wire          stall_m;
       wire [3:0]    busy_m;
       wire          err_m;
 
-      //Controller
+      // Controller
       wire         enable_ctrl;
       wire         comp_ctrl;
       wire         write_ctrl;
@@ -61,10 +61,19 @@ ctrl  = controller
       wire         mem_rd_ctrl;
       wire         valid_in_ctrl;
       wire         done_ctrl;  
+      wire [1:0]   word_c_ctrl;
+      wire [1:0]   word_m_ctrl;
+      wire         cache_hit_ctrl;
 
-      //Data-In Mux Wires
-      wire [15:0] data_in_c0,
+      // Data-In Mux Wires
+      wire [15:0] data_in_c0;
       wire [15:0] data_in_m;
+
+      // Main Mem Addr Concat Wire
+      wire [15:0] addr_m;
+
+      // Cache Zero Offset Wire
+      wire [2:0] offset_c0;
 
 
 //////////////
@@ -88,7 +97,7 @@ ctrl  = controller
                               .createdump           (createdump),
                               .tag_in               (Addr[15:11]),
                               .index                (Addr[10:3]),
-                              .offset               (Addr[2:0]),
+                              .offset               (offset_c0),
                               .data_in              (data_in_c0),
                               .comp                 (comp_ctrl),
                               .write                (write_ctrl),
@@ -103,7 +112,7 @@ ctrl  = controller
                         .clk               (clk),
                         .rst               (rst),
                         .createdump        (createdump),
-                        .addr              (Addr),
+                        .addr              (addr_m),
                         .data_in           (data_in_m),
                         .wr                (mem_wr_ctrl),
                         .rd                (mem_rd_ctrl));
@@ -116,6 +125,9 @@ ctrl  = controller
                            .mem_rd    (mem_rd_ctrl),
                            .valid_in  (valid_in_ctrl),
                            .done      (done_ctrl),
+                           .word_c    (word_c_ctrl),
+                           .word_m    (word_m_ctrl),
+                           .cache_hit (cache_hit_ctrl),
                            //Inputs
                            .rd        (Rd),
                            .wr        (Wr),
@@ -127,11 +139,27 @@ ctrl  = controller
                            .clk       (clk),
                            .rst       (rst));
 
+
+////////////////////
+// DATA IN MUXES //
+//////////////////
+
       // Data-In Cache Zero Mux
       assign data_in_c0 = (~comp_ctrl ? data_out_m : DataIn);
 
       // Data-In Main Memory Mux
       assign data_in_m = (mem_wr ? DataIn : data_out_c0);
+
+
+//////////////////
+// ADDR CONCAT //
+////////////////
+
+      // Cache Zero Offset Concat
+      assign offset_c0 = {word_c_ctrl, Addr[0]};
+
+      // Main Memory Addr Concat
+      assign addr_m = {Addr[15:3], word_m_ctrl, Addr[0]};
 
 
 /////////////
@@ -141,7 +169,7 @@ ctrl  = controller
       assign DataOut = data_out_c0;
       assign Done = done_ctrl;
       assign Stall = stall_m;
-      assign CacheHit = /*TODO*/;
+      assign CacheHit = cache_hit_ctrl;
       assign err = err_c0 | err_m;
    
 endmodule // mem_system

@@ -33,6 +33,10 @@ module cache_controller(
             cache_hit,  // Whether cache_hit achieved without accessing main mem
             done;       // Done signal (only positive for one cycle)
 
+        output reg [1:0] 
+            word_m      // Bits [2:1] of addr for accessing Four Bank Mem by word
+            word_c      // Bits [2:1] of addr for accessing Cache by word
+
 ////////////
 // WIRES //
 //////////
@@ -75,7 +79,8 @@ module cache_controller(
                 //NOTE: Combined what used to be states 0 (WAIT), 1 (COMP_R), and 3 (COMP_W) to be one state (0) 
                 //      (Otherwise cache wastes a cycle)
                 //NOTE: Added additional read state since cache_hit is only if we succeed right away
-                //TODO: Write whole cacheline instead of just one word for AccessW requires multiple states (I believe 6)
+                //NOTE: AccesWrite writes whole cacheline instead of just one word 
+                //      requires multiple states (6 states)
                 // WAIT/COMP_R/COMP_W
                 4'd0: begin
                     enable       = ((rd | wr) ? 1'b1 : 1'b0);
@@ -86,6 +91,8 @@ module cache_controller(
                     valid_in     = 1'b0;
                     done         = (rd ? (hit & valid) : 1'b0);
                     cache_hit    = ((rd | wr) ? (hit & valid) : 1'b0);
+                    word_m       = offset[2:1];
+                    word_c       = offset[2:1];
 
 
                     assign next_state = (rd ? ((hit & valid) ? 4'd0 : 4'd2) : // Read
@@ -107,6 +114,9 @@ module cache_controller(
                     mem_rd       = 1'b0;
                     valid_in     = 1'b0;
                     done         = (hit & valid);
+                    word_m       = offset[2:1];
+                    word_c       = offset[2:1];
+
 
                     assign next_state = ((hit & valid) ? 4'd0 : 4'd2);
                 end
@@ -125,32 +135,46 @@ module cache_controller(
                 // end
 
                 // ACCESS_W_0
+                /*
+                    Read 00
+                */
                 4'd2: begin
-                    enable       = 1'b1;
+                    enable       = 1'b0;
                     comp         = 1'b0;
-                    write        = 1'b1;
+                    write        = 1'b0;
                     mem_wr       = 1'b0;
                     mem_rd       = 1'b1;
                     valid_in     = 1'b1;
                     done         = 1'b0;
+                    word_m       = 2'b00;
+                    word_c       = offset[2:1];
 
-                    assign next_state = (|busy ? 4'd2 : 4'd1);
+                    assign next_state = 4'd3;
                 end
 
                 // ACCESS_W_1
+                /*
+                    Read 01
+                */
                 4'd3: begin
-                    enable       = 1'b1;
+                    enable       = 1'b0;
                     comp         = 1'b0;
-                    write        = 1'b1;
+                    write        = 1'b0;
                     mem_wr       = 1'b0;
                     mem_rd       = 1'b1;
                     valid_in     = 1'b1;
                     done         = 1'b0;
+                    word_m       = 2'b01;
+                    word_c       = offset[2:1];
 
-                    assign next_state = (|busy ? 4'd2 : 4'd1);
+                    assign next_state = 4'd4;
                 end
 
                 // ACCESS_W_2
+                /*
+                    Read 10
+                    Write 00
+                */
                 4'd4: begin
                     enable       = 1'b1;
                     comp         = 1'b0;
@@ -159,11 +183,17 @@ module cache_controller(
                     mem_rd       = 1'b1;
                     valid_in     = 1'b1;
                     done         = 1'b0;
+                    word_m       = 2'b10;
+                    word_c       = 2'b00;
 
-                    assign next_state = (|busy ? 4'd2 : 4'd1);
+                    assign next_state = 4'd5;
                 end
 
                 // ACCESS_W_3
+                /*
+                    Read 11
+                    Write 01
+                */
                 4'd5: begin
                     enable       = 1'b1;
                     comp         = 1'b0;
@@ -172,34 +202,46 @@ module cache_controller(
                     mem_rd       = 1'b1;
                     valid_in     = 1'b1;
                     done         = 1'b0;
+                    word_m       = 2'b11;
+                    word_c       = 2'b00;
 
-                    assign next_state = (|busy ? 4'd2 : 4'd1);
+                    assign next_state = 4'd6;
                 end
 
                 // ACCESS_W_4
+                /*
+                    Write 10
+                */
                 4'd6: begin
                     enable       = 1'b1;
                     comp         = 1'b0;
                     write        = 1'b1;
                     mem_wr       = 1'b0;
-                    mem_rd       = 1'b1;
+                    mem_rd       = 1'b0;
                     valid_in     = 1'b1;
                     done         = 1'b0;
+                    word_m       = offset[2:1];
+                    word_c       = 2'b10;
 
-                    assign next_state = (|busy ? 4'd2 : 4'd1);
+                    assign next_state = 4'd7;
                 end
 
                 // ACCESS_W_5
+                /*
+                    Write 11
+                */
                 4'd7: begin
                     enable       = 1'b1;
                     comp         = 1'b0;
                     write        = 1'b1;
                     mem_wr       = 1'b0;
-                    mem_rd       = 1'b1;
+                    mem_rd       = 1'b0;
                     valid_in     = 1'b1;
                     done         = 1'b0;
+                    word_m       = offset[2:1];
+                    word_c       = 2'b11;
 
-                    assign next_state = (|busy ? 4'd2 : 4'd1);
+                    assign next_state = 4'd1;
                 end
 
 
@@ -225,6 +267,8 @@ module cache_controller(
                     mem_rd       = 1'b0;
                     valid_in     = 1'b0;
                     done         = ~(|busy);
+                    word_m       = offset[2:1];
+                    word_c       = offset[2:1];
 
                     assign next_state = (|busy ? 4'd8 : 4'd0);
                 end
@@ -238,6 +282,8 @@ module cache_controller(
                     mem_rd       = 1'b0;
                     valid_in     = 1'b0;
                     done         = ~(|busy);
+                    word_m       = offset[2:1];
+                    word_c       = offset[2:1];
 
                     assign next_state = (|busy ? 4'd9 : 4'd0);
                 end
