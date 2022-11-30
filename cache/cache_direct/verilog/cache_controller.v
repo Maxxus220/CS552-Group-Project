@@ -36,8 +36,8 @@ module cache_controller(
 ////////////
 // WIRES //
 //////////
-        wire [2:0] cur_state;
-        wire [2:0] next_state;
+        wire [3:0] cur_state;
+        wire [3:0] next_state;
 
 ////////////
 // STATE //
@@ -47,9 +47,14 @@ module cache_controller(
     CompR        = 0
     CompW        = 0
     CompRRetry   = 1
-    AccessW      = 2
-    Cache+Direct = 4
-    DirectMem    = 5
+    AccessW_0    = 2
+    AccessW_1    = 3
+    AccessW_2    = 4
+    AccessW_3    = 5
+    AccessW_4    = 6
+    AccessW_5    = 7
+    Cache+Direct = 8
+    DirectMem    = 9
 */
         dff STATE [2:0] (.q(cur_state), .d(next_state), .clk(clk), .rst(rst));
 
@@ -72,7 +77,7 @@ module cache_controller(
                 //NOTE: Added additional read state since cache_hit is only if we succeed right away
                 //TODO: Write whole cacheline instead of just one word for AccessW requires multiple states (I believe 6)
                 // WAIT/COMP_R/COMP_W
-                3'd0: begin
+                4'd0: begin
                     enable       = ((rd | wr) ? 1'b1 : 1'b0);
                     comp         = ((rd | wr) ? 1'b1 : 1'b0);
                     write        = (wr ? 1'b1 : 1'b0);
@@ -83,9 +88,9 @@ module cache_controller(
                     cache_hit    = ((rd | wr) ? (hit & valid) : 1'b0);
 
 
-                    assign next_state = (rd ? ((hit & valid) ? 3'd0 : 3'd2) : // Read
-                                        (wr ? ((hit & valid) ? 3'd4 : 3'd5) : // Write
-                                        3'd0));                               // No mem operation (spin)
+                    assign next_state = (rd ? ((hit & valid) ? 4'd0 : 4'd2) : // Read
+                                        (wr ? ((hit & valid) ? 4'd8 : 4'd9) : // Write
+                                        4'd0));                               // No mem operation (spin)
                 end
                 
                 // COMP_R Retry
@@ -94,7 +99,7 @@ module cache_controller(
                     Otherwise it's the same as COMP_R
                     Should never really not be hit & valid
                 */
-                3'd1: begin
+                4'd1: begin
                     enable       = 1'b1;
                     comp         = 1'b1;
                     write        = 1'b0;
@@ -103,11 +108,11 @@ module cache_controller(
                     valid_in     = 1'b0;
                     done         = (hit & valid);
 
-                    assign next_state = ((hit & valid) ? 0 : 2);
+                    assign next_state = ((hit & valid) ? 4'd0 : 4'd2);
                 end
 
                 // // COMP_R
-                // 3'd1: begin
+                // 4'd1: begin
                 //     enable       = 1'b1;
                 //     comp         = 1'b1;
                 //     write        = 1'b0;
@@ -116,11 +121,11 @@ module cache_controller(
                 //     valid_in     = 1'b0;
                 //     done         = (hit & valid);
 
-                //     assign next_state = ((hit & valid) ? 0 : 2);
+                //     assign next_state = ((hit & valid) ? 4'd0 : 4'd2);
                 // end
 
                 // ACCESS_W
-                3'd2: begin
+                4'd2: begin
                     enable       = 1'b1;
                     comp         = 1'b0;
                     write        = 1'b1;
@@ -129,11 +134,11 @@ module cache_controller(
                     valid_in     = 1'b1;
                     done         = 1'b0;
 
-                    assign next_state = (|busy ? 2 : 1);
+                    assign next_state = (|busy ? 4'd2 : 4'd1);
                 end
 
                 // // COMP_W
-                // 3'd3: begin
+                // 4'd3: begin
                 //     enable       = 1'b1;
                 //     comp         = 1'b1;
                 //     write        = 1'b1;
@@ -142,11 +147,11 @@ module cache_controller(
                 //     valid_in     = 1'b0;
                 //     done         = 1'b0;
 
-                //     assign next_state = ((hit & valid) ? 4 : 5);
+                //     assign next_state = ((hit & valid) ? 4'd4 : 4'd5);
                 // end 
 
                 // CACHE_+_DIRECT
-                3'd4: begin
+                4'd8: begin
                     enable       = 1'b1;
                     comp         = 1'b1;
                     write        = 1'b1;
@@ -155,11 +160,11 @@ module cache_controller(
                     valid_in     = 1'b0;
                     done         = ~(|busy);
 
-                    assign next_state = (|busy ? 3'd4 : 3'd0);
+                    assign next_state = (|busy ? 4'd8 : 4'd0);
                 end
 
                 // DIRECT_MEM
-                3'd5: begin
+                4'd9: begin
                     enable       = 1'b0;
                     comp         = 1'b0;
                     write        = 1'b0;
@@ -168,7 +173,7 @@ module cache_controller(
                     valid_in     = 1'b0;
                     done         = ~(|busy);
 
-                    assign next_state = (|busy ? 3'd5 : 3'd0);
+                    assign next_state = (|busy ? 4'd9 : 4'd0);
                 end
 
                 default: begin
