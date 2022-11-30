@@ -1,5 +1,5 @@
 module cache_controller(
-    rd, wr, hit, dirty, valid, busy, offset, stall,                      // Inputs
+    rd, wr, hit, dirty, valid, busy, offset, stall,                     // Inputs
     enable, comp, write, mem_wr, mem_rd, valid_in, cache_hit, done,     // Outputs
     word_m, word_c,                                                     // ^^^^^^^
     clk, rst);                                                          // Clk & Rst
