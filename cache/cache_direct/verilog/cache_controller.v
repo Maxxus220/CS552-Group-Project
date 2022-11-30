@@ -67,8 +67,9 @@ module cache_controller(
         always @(*) begin
             case (cur_state)
 
-                //TODO: Believe states 0, 1, and 3 need to be one state (Otherwise cache wastes a cycle)
+                //TODO: Believe states 0 (WAIT), 1 (COMP_R), and 3 (COMP_W) need to be one state (Otherwise cache wastes a cycle)
                 //TODO: Also need additional read state since cache_hit is only if we succeed right away
+                //TODO: Write whole cacheline instead of just one word for AccessW
                 // WAIT/COMP_R/COMP_W
                 3'd0: begin
                     enable       = ((rd | wr) ? 1'b1 : 1'b0);
