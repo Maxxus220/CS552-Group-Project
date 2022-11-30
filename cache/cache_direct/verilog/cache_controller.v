@@ -124,7 +124,7 @@ module cache_controller(
                 //     assign next_state = ((hit & valid) ? 4'd0 : 4'd2);
                 // end
 
-                // ACCESS_W
+                // ACCESS_W_0
                 4'd2: begin
                     enable       = 1'b1;
                     comp         = 1'b0;
@@ -136,6 +136,72 @@ module cache_controller(
 
                     assign next_state = (|busy ? 4'd2 : 4'd1);
                 end
+
+                // ACCESS_W_1
+                4'd3: begin
+                    enable       = 1'b1;
+                    comp         = 1'b0;
+                    write        = 1'b1;
+                    mem_wr       = 1'b0;
+                    mem_rd       = 1'b1;
+                    valid_in     = 1'b1;
+                    done         = 1'b0;
+
+                    assign next_state = (|busy ? 4'd2 : 4'd1);
+                end
+
+                // ACCESS_W_2
+                4'd4: begin
+                    enable       = 1'b1;
+                    comp         = 1'b0;
+                    write        = 1'b1;
+                    mem_wr       = 1'b0;
+                    mem_rd       = 1'b1;
+                    valid_in     = 1'b1;
+                    done         = 1'b0;
+
+                    assign next_state = (|busy ? 4'd2 : 4'd1);
+                end
+
+                // ACCESS_W_3
+                4'd5: begin
+                    enable       = 1'b1;
+                    comp         = 1'b0;
+                    write        = 1'b1;
+                    mem_wr       = 1'b0;
+                    mem_rd       = 1'b1;
+                    valid_in     = 1'b1;
+                    done         = 1'b0;
+
+                    assign next_state = (|busy ? 4'd2 : 4'd1);
+                end
+
+                // ACCESS_W_4
+                4'd6: begin
+                    enable       = 1'b1;
+                    comp         = 1'b0;
+                    write        = 1'b1;
+                    mem_wr       = 1'b0;
+                    mem_rd       = 1'b1;
+                    valid_in     = 1'b1;
+                    done         = 1'b0;
+
+                    assign next_state = (|busy ? 4'd2 : 4'd1);
+                end
+
+                // ACCESS_W_5
+                4'd7: begin
+                    enable       = 1'b1;
+                    comp         = 1'b0;
+                    write        = 1'b1;
+                    mem_wr       = 1'b0;
+                    mem_rd       = 1'b1;
+                    valid_in     = 1'b1;
+                    done         = 1'b0;
+
+                    assign next_state = (|busy ? 4'd2 : 4'd1);
+                end
+
 
                 // // COMP_W
                 // 4'd3: begin
