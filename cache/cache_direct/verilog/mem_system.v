@@ -64,6 +64,7 @@ ctrl  = controller
       wire [1:0]   word_c_ctrl;
       wire [1:0]   word_m_ctrl;
       wire         cache_hit_ctrl;
+      wire         stall_ctrl;
 
       // Data-In Mux Wires
       wire [15:0] data_in_c0;
@@ -128,6 +129,7 @@ ctrl  = controller
                            .word_c    (word_c_ctrl),
                            .word_m    (word_m_ctrl),
                            .cache_hit (cache_hit_ctrl),
+                           .stall     (stall_ctrl),
                            //Inputs
                            .rd        (Rd),
                            .wr        (Wr),
@@ -169,7 +171,7 @@ ctrl  = controller
 
       assign DataOut = data_out_c0;
       assign Done = done_ctrl;
-      assign Stall = ~done_ctrl;
+      assign Stall = stall_ctrl;
       assign CacheHit = cache_hit_ctrl;
       assign err = err_c0 | err_m;
    
