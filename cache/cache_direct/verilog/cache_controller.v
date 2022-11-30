@@ -56,7 +56,7 @@ module cache_controller(
     Cache+Direct = 8
     DirectMem    = 9
 */
-        dff STATE [2:0] (.q(cur_state), .d(next_state), .clk(clk), .rst(rst));
+        dff STATE [3:0] (.q(cur_state), .d(next_state), .clk(clk), .rst(rst));
 
 ////////////////////
 // STATE MACHINE //
