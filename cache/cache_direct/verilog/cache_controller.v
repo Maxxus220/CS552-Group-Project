@@ -64,6 +64,7 @@ module cache_controller(
     AccessR_4    = 11
     AccessR_5    = 12
     MemWait      = 13
+    CompWWait    = 14
 */
         dff STATE [3:0] (.q(cur_state), .d(next_state), .clk(clk), .rst(rst));
 
@@ -139,13 +140,13 @@ module cache_controller(
                     mem_wr       = 1'b0;
                     mem_rd       = 1'b0;
                     valid_in     = 1'b1;
-                    done         = (hit & valid);
+                    done         = 1'b0;
                     cache_hit    = (hit & valid);
                     word_m       = offset[2:1];
                     word_c       = offset[2:1];
-                    stall_out    = !(hit & valid);
+                    stall_out    = 1'b1;
 
-                    next_state = ((hit & valid) ? 4'd0 : 4'd5);
+                    next_state = ((hit & valid) ? 4'd14 : 4'd5);
                 end
 
                 // COMP_W_RETRY
@@ -156,12 +157,12 @@ module cache_controller(
                     mem_wr       = 1'b0;
                     mem_rd       = 1'b0;
                     valid_in     = 1'b1;
-                    done         = (hit & valid);
+                    done         = 1'b0;
                     word_m       = offset[2:1];
                     word_c       = offset[2:1];
-                    stall_out    = !(hit & valid);
+                    stall_out    = 1'b1;
 
-                    next_state = 4'd0;
+                    next_state = 4'd14;
                 end
 
                 // ACCESS_R
@@ -306,6 +307,22 @@ module cache_controller(
                     stall_out    = 1'b1;
 
                     next_state = (|busy ? 4'd13 : 4'd7);
+                end
+
+                // COMP_W_WAIT
+                4'd14: begin
+                    enable       = 1'b1;
+                    comp         = 1'b1;
+                    write        = 1'b1;
+                    mem_wr       = 1'b0;
+                    mem_rd       = 1'b0;
+                    valid_in     = 1'b1;
+                    done         = (hit & valid);
+                    word_m       = offset[2:1];
+                    word_c       = offset[2:1];
+                    stall_out    = !(hit & valid);
+
+                    next_state = 4'd0;
                 end
 
                 default: begin
