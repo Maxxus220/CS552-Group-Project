@@ -114,7 +114,7 @@ ctrl  = controller
                         .rst               (rst),
                         .createdump        (createdump),
                         .addr              (addr_m),
-                        .data_in           (data_out_c0),
+                        .data_in           (data_in_m),
                         .wr                (mem_wr_ctrl),
                         .rd                (mem_rd_ctrl));
 
@@ -151,7 +151,7 @@ ctrl  = controller
       assign data_in_c0 = (~comp_ctrl ? data_out_m : DataIn);
 
       // Data-In Main Memory Mux
-      // assign data_in_m = (mem_wr_ctrl ? DataIn : data_out_c0);
+      assign data_in_m = (mem_wr_ctrl ? DataIn : data_out_c0);
 
 
 //////////////////
