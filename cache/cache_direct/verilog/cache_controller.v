@@ -51,19 +51,19 @@ module cache_controller(
 //////////
 /*  
     Wait         = 0
-    CompR        = 0
-    CompW        = 0
-    CompRRetry   = 1
-    AccessW_0    = 2
-    AccessW_1    = 3
-    AccessW_2    = 4
-    AccessW_3    = 5
-    AccessW_4    = 6
-    AccessW_5    = 7
-    CompWRetry   = 8
-    DirectMem    = 9
-    WaitMemWrite = 10
-    AccessRead   = 11
+    CompR        = 1
+    CompRRetry   = 2
+    CompW        = 3
+    CompWRetry   = 4
+    AccessR      = 5
+    MemWrite     = 6
+    AccessR_0    = 7
+    AccessR_1    = 8
+    AccessR_2    = 9
+    AccessR_3    = 10
+    AccessR_4    = 11
+    AccessR_5    = 12
+    MemWait      = 13
 */
         dff STATE [3:0] (.q(cur_state), .d(next_state), .clk(clk), .rst(rst));
 
@@ -81,97 +81,155 @@ module cache_controller(
         always @(*) begin
             case (cur_state)
 
-                //NOTE: Combined what used to be states 0 (WAIT), 1 (COMP_R), and 3 (COMP_W) to be one state (0) 
-                //      (Otherwise cache wastes a cycle)
-                //NOTE: Added additional read state since cache_hit is only if we succeed right away
-                //NOTE: AccesWrite writes whole cacheline instead of just one word 
-                //      requires multiple states (6 states)
-                // WAIT/COMP_R/COMP_W
+                // WAIT
                 4'd0: begin
-                    enable       = ((rd | wr) ? 1'b1 : 1'b0);
-                    comp         = ((rd | wr) ? 1'b1 : 1'b0);
-                    write        = (wr ? 1'b1 : 1'b0);
+                    enable       = 1'b0;
+                    comp         = 1'b0;
+                    write        = 1'b0;
                     mem_wr       = 1'b0;
                     mem_rd       = 1'b0;
-                    valid_in     = (wr ? 1'b1: 1'b0);
-                    done         = ((rd | wr) ? (hit & valid) : 1'b0);
-                    cache_hit    = ((rd | wr) ? (hit & valid) : 1'b0);
+                    valid_in     = 1'b0;
+                    done         = 1'b0;
+                    cache_hit    = 1'b0;
                     word_m       = offset[2:1];
                     word_c       = offset[2:1];
-                    stall_out    = ((rd | wr) ? (!(hit & valid)) : 1'b0);
+                    stall_out    = rd | wr;
 
-
-                    next_state = (rd ? ((hit & valid) ? 4'd0 : 4'd11) : // Read
-                                 (wr ? ((hit & valid) ? 4'd0 : 4'd11) : // Write
-                                 4'd0));                               // No mem operation (spin)
+                    next_state = (rd ? 4'd1 : (wr ? 4'd3 : 4'd0));
                 end
                 
-                // COMP_R Retry
-                /*
-                    Needed so that we don't reset cache_hit
-                    Otherwise it's the same as COMP_R
-                    Should never really not be hit & valid
-                */
+                // COMP_R
                 4'd1: begin
                     enable       = 1'b1;
                     comp         = 1'b1;
                     write        = 1'b0;
                     mem_wr       = 1'b0;
                     mem_rd       = 1'b0;
-                    valid_in     = 1'b0;
+                    valid_in     = 1'b1;
+                    done         = (hit & valid);
+                    cache_hit    = (hit & valid);
+                    word_m       = offset[2:1];
+                    word_c       = offset[2:1];
+                    stall_out    = !(hit & valid);
+
+                    next_state = ((hit & valid) ? 4'd0 : 4'd5);
+                end
+
+                // COMP_R_RETRY
+                4'd2: begin
+                    enable       = 1'b1;
+                    comp         = 1'b1;
+                    write        = 1'b0;
+                    mem_wr       = 1'b0;
+                    mem_rd       = 1'b0;
+                    valid_in     = 1'b1;
                     done         = (hit & valid);
                     word_m       = offset[2:1];
                     word_c       = offset[2:1];
-                    stall_out    = 1'b0;
+                    stall_out    = !(hit & valid);
 
+                    next_state = 4'd0;
+                end
 
-                    next_state = ((hit & valid) ? 4'd0 : 4'd2);
+                // COMP_W
+                4'd3: begin
+                    enable       = 1'b1;
+                    comp         = 1'b1;
+                    write        = 1'b1;
+                    mem_wr       = 1'b0;
+                    mem_rd       = 1'b0;
+                    valid_in     = 1'b1;
+                    done         = (hit & valid);
+                    cache_hit    = (hit & valid);
+                    word_m       = offset[2:1];
+                    word_c       = offset[2:1];
+                    stall_out    = !(hit & valid);
+
+                    next_state = ((hit & valid) ? 4'd0 : 4'd5);
+                end
+
+                // COMP_W_RETRY
+                4'd4: begin
+                    enable       = 1'b1;
+                    comp         = 1'b1;
+                    write        = 1'b1;
+                    mem_wr       = 1'b0;
+                    mem_rd       = 1'b0;
+                    valid_in     = 1'b1;
+                    done         = (hit & valid);
+                    word_m       = offset[2:1];
+                    word_c       = offset[2:1];
+                    stall_out    = !(hit & valid);
+
+                    next_state = 4'd0;
+                end
+
+                // ACCESS_R
+                4'd5: begin
+                    enable       = 1'b1;
+                    comp         = 1'b0;
+                    write        = 1'b0;
+                    mem_wr       = 1'b0;
+                    mem_rd       = 1'b0;
+                    valid_in     = 1'b0;
+                    done         = 1'b0;
+                    word_m       = offset[2:1];
+                    word_c       = offset[2:1];
+                    stall_out    = 1'b1;
+
+                    next_state = ((dirty & valid) ? 4'd6 : 4'd7);
+                end
+
+                // MEM_WRITE
+                4'd6: begin
+                    enable       = 1'b1;
+                    comp         = 1'b0;
+                    write        = 1'b0;
+                    mem_wr       = 1'b1;
+                    mem_rd       = 1'b0;
+                    valid_in     = 1'b0;
+                    done         = 1'b0;
+                    word_m       = offset[2:1];
+                    word_c       = offset[2:1];
+                    stall_out    = 1'b1;
+
+                    next_state = 4'd13;
                 end
 
                 // ACCESS_W_0
-                /*
-                    Read 00
-                */
-                4'd2: begin
+                4'd7: begin
                     enable       = 1'b0;
                     comp         = 1'b0;
                     write        = 1'b0;
                     mem_wr       = 1'b0;
                     mem_rd       = 1'b1;
-                    valid_in     = 1'b1;
+                    valid_in     = 1'b0;
                     done         = 1'b0;
                     word_m       = 2'b00;
                     word_c       = offset[2:1];
                     stall_out    = 1'b1;
 
-                    next_state = 4'd3;
+                    next_state = 4'd8;
                 end
 
                 // ACCESS_W_1
-                /*
-                    Read 01
-                */
-                4'd3: begin
+                4'd8: begin
                     enable       = 1'b0;
                     comp         = 1'b0;
                     write        = 1'b0;
                     mem_wr       = 1'b0;
                     mem_rd       = 1'b1;
-                    valid_in     = 1'b1;
+                    valid_in     = 1'b0;
                     done         = 1'b0;
                     word_m       = 2'b01;
                     word_c       = offset[2:1];
                     stall_out    = 1'b1;
 
-                    next_state = 4'd4;
+                    next_state = 4'd9;
                 end
 
                 // ACCESS_W_2
-                /*
-                    Read 10
-                    Write 00
-                */
-                4'd4: begin
+                4'd9: begin
                     enable       = 1'b1;
                     comp         = 1'b0;
                     write        = 1'b1;
@@ -183,15 +241,11 @@ module cache_controller(
                     word_c       = 2'b00;
                     stall_out    = 1'b1;
 
-                    next_state = 4'd5;
+                    next_state = 4'd10;
                 end
 
                 // ACCESS_W_3
-                /*
-                    Read 11
-                    Write 01
-                */
-                4'd5: begin
+                4'd10: begin
                     enable       = 1'b1;
                     comp         = 1'b0;
                     write        = 1'b1;
@@ -203,14 +257,11 @@ module cache_controller(
                     word_c       = 2'b01;
                     stall_out    = 1'b1;
 
-                    next_state = 4'd6;
+                    next_state = 4'd11;
                 end
 
                 // ACCESS_W_4
-                /*
-                    Write 10
-                */
-                4'd6: begin
+                4'd11: begin
                     enable       = 1'b1;
                     comp         = 1'b0;
                     write        = 1'b1;
@@ -222,14 +273,11 @@ module cache_controller(
                     word_c       = 2'b10;
                     stall_out    = 1'b1;
 
-                    next_state = 4'd7;
+                    next_state = 4'd12;
                 end
 
                 // ACCESS_W_5
-                /*
-                    Write 11
-                */
-                4'd7: begin
+                4'd12: begin
                     enable       = 1'b1;
                     comp         = 1'b0;
                     write        = 1'b1;
@@ -239,62 +287,14 @@ module cache_controller(
                     done         = 1'b0;
                     word_m       = offset[2:1];
                     word_c       = 2'b11;
-                    stall_out    = 1'b0;
+                    stall_out    = 1'b1;
 
-                    next_state = (rd ? 4'd1 : 4'd8);
+                    next_state = (rd ? 4'd2 : 4'd4);
                 end
 
-                // COMP_W_RETRY
-                4'd8: begin
-                    enable       = 1'b1;
-                    comp         = 1'b1;
-                    write        = 1'b1;
-                    mem_wr       = 1'b0;
-                    mem_rd       = 1'b0;
-                    valid_in     = 1'b1;
-                    done         = 1'b1;
-                    word_m       = offset[2:1];
-                    word_c       = offset[2:1];
-                    stall_out    = 1'b0;
-
-                    next_state = 4'd0;
-                end
-
-                // DIRECT_MEM
-                4'd9: begin
+                // MEM_WAIT
+                4'd13: begin
                     enable       = 1'b0;
-                    comp         = 1'b0;
-                    write        = 1'b0;
-                    mem_wr       = 1'b1;
-                    mem_rd       = 1'b0;
-                    valid_in     = 1'b0;
-                    done         = 1'b0;
-                    word_m       = offset[2:1];
-                    word_c       = offset[2:1];
-                    stall_out        = 1'b1;
-
-                    next_state = 4'd10;
-                end
-
-                // WAIT_MEM_WRITE
-                4'd10: begin
-                    enable       = 1'b0;
-                    comp         = 1'b0;
-                    write        = 1'b0;
-                    mem_wr       = 1'b0;
-                    mem_rd       = 1'b0;
-                    valid_in     = 1'b0;
-                    done         = ~(|busy);
-                    word_m       = offset[2:1];
-                    word_c       = offset[2:1];
-                    stall_out        = |busy;
-
-                    next_state = (|busy ? 4'd10 : 4'd2);
-                end
-
-                // ACCESS_READ
-                4'd11: begin
-                    enable       = 1'b1;
                     comp         = 1'b0;
                     write        = 1'b0;
                     mem_wr       = 1'b0;
@@ -305,7 +305,7 @@ module cache_controller(
                     word_c       = offset[2:1];
                     stall_out    = 1'b1;
 
-                    next_state = (dirty ? 4'd9 : 4'd2);
+                    next_state = (|busy ? 4'd13 : 4'd7);
                 end
 
                 default: begin

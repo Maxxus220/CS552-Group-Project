@@ -68,7 +68,7 @@ ctrl  = controller
 
       // Data-In Mux Wires
       wire [15:0] data_in_c0;
-      wire [15:0] data_in_m;
+      //wire [15:0] data_in_m;
 
       // Main Mem Addr Concat Wire
       wire [15:0] addr_m;
@@ -114,7 +114,7 @@ ctrl  = controller
                         .rst               (rst),
                         .createdump        (createdump),
                         .addr              (addr_m),
-                        .data_in           (data_in_m),
+                        .data_in           (data_out_c0),
                         .wr                (mem_wr_ctrl),
                         .rd                (mem_rd_ctrl));
 
@@ -151,7 +151,7 @@ ctrl  = controller
       assign data_in_c0 = (~comp_ctrl ? data_out_m : DataIn);
 
       // Data-In Main Memory Mux
-      assign data_in_m = (mem_wr_ctrl ? DataIn : data_out_c0);
+      //assign data_in_m = (mem_wr_ctrl ? DataIn : data_out_c0);
 
 
 //////////////////
