@@ -238,7 +238,7 @@ module cache_controller(
                     valid_in     = 1'b1;
                     done         = 1'b0;
                     word_m       = offset[2:1];
-                    word_c       = offset[2:1];
+                    word_c       = 2'b11;
                     stall_out    = 1'b0;
 
                     next_state = 4'd0;
