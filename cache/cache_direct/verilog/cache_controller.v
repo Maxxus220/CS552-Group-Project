@@ -122,7 +122,7 @@ module cache_controller(
                     done         = (hit & valid);
                     word_m       = offset[2:1];
                     word_c       = offset[2:1];
-                    stall_out        = 1'b0;
+                    stall_out    = 1'b0;
 
 
                     next_state = ((hit & valid) ? 4'd0 : 4'd2);
@@ -142,7 +142,7 @@ module cache_controller(
                     done         = 1'b0;
                     word_m       = 2'b00;
                     word_c       = offset[2:1];
-                    stall_out        = 1'b1;
+                    stall_out    = 1'b1;
 
                     next_state = 4'd3;
                 end
@@ -161,7 +161,7 @@ module cache_controller(
                     done         = 1'b0;
                     word_m       = 2'b01;
                     word_c       = offset[2:1];
-                    stall_out        = 1'b1;
+                    stall_out    = 1'b1;
 
                     next_state = 4'd4;
                 end
@@ -181,7 +181,7 @@ module cache_controller(
                     done         = 1'b0;
                     word_m       = 2'b10;
                     word_c       = 2'b00;
-                    stall_out        = 1'b1;
+                    stall_out    = 1'b1;
 
                     next_state = 4'd5;
                 end
@@ -201,7 +201,7 @@ module cache_controller(
                     done         = 1'b0;
                     word_m       = 2'b11;
                     word_c       = 2'b01;
-                    stall_out        = 1'b1;
+                    stall_out    = 1'b1;
 
                     next_state = 4'd6;
                 end
@@ -220,7 +220,7 @@ module cache_controller(
                     done         = 1'b0;
                     word_m       = offset[2:1];
                     word_c       = 2'b10;
-                    stall_out        = 1'b1;
+                    stall_out    = 1'b1;
 
                     next_state = 4'd7;
                 end
@@ -255,7 +255,7 @@ module cache_controller(
                     done         = 1'b1;
                     word_m       = offset[2:1];
                     word_c       = offset[2:1];
-                    stall_out        = 1'b1;
+                    stall_out    = 1'b1;
 
                     next_state = 4'd10;
                 end
