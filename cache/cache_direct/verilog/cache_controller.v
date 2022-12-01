@@ -255,9 +255,9 @@ module cache_controller(
                     done         = 1'b1;
                     word_m       = offset[2:1];
                     word_c       = offset[2:1];
-                    stall_out    = 1'b1;
+                    stall_out    = 1'b0;
 
-                    next_state = 4'd10;
+                    next_state = 4'd0;
                 end
 
                 // DIRECT_MEM
