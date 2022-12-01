@@ -98,7 +98,7 @@ module cache_controller(
                     cache_hit    = ((rd | wr) ? (hit & valid) : 1'b0);
                     word_m       = offset[2:1];
                     word_c       = offset[2:1];
-                    stall_out    = ((rd | wr) ? (!(hit & valid))) : 1'b0;
+                    stall_out    = ((rd | wr) ? (!(hit & valid)) : 1'b0);
 
 
                     next_state = (rd ? ((hit & valid) ? 4'd0 : 4'd11) : // Read
