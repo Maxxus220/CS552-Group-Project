@@ -241,7 +241,7 @@ module cache_controller(
                     word_c       = 2'b11;
                     stall_out    = 1'b0;
 
-                    next_state = 4'd0;
+                    next_state = (rd ? 4'd1 : 4'd8);
                 end
 
                 // COMP_W_RETRY
