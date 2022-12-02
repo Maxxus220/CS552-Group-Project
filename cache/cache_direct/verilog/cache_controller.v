@@ -288,7 +288,7 @@ module cache_controller(
                     word_c       = 2'b11;
                     stall_out    = 1'b1;
 
-                    next_state = 4'd1;
+                    next_state = (|busy ? 4'd12 : 4'd1);
                 end
 
                 default: begin
