@@ -95,7 +95,7 @@ module cache_controller(
                     stall_out    = ((rd|wr) ? !(hit & valid) : 1'b0);
 
                     next_state = (((hit & valid) | !(rd | wr)) ? 4'd0 : // Hit or no mem access (idle)
-                                 ((dirty & valid) ? 4'd3 : 4'd7)); // Miss (dirty or clean)
+                                 ((dirty & valid) ? 4'd3 : 4'd7)); // Miss (dirty or clean) 
                 end
                 
                 // RETRY
@@ -288,7 +288,23 @@ module cache_controller(
                     word_c       = 2'b11;
                     stall_out    = 1'b1;
 
-                    next_state = (|busy ? 4'd12 : 4'd1);
+                    next_state = 4'd13;
+                end
+                
+                // PULL_6
+                4'd13: begin
+                    enable       = 1'b1;
+                    comp         = 1'b0;
+                    write        = 1'b0;
+                    mem_wr       = 1'b0;
+                    mem_rd       = 1'b0;
+                    valid_in     = 1'b1;
+                    done         = 1'b0;
+                    word_m       = offset[2:1];
+                    word_c       = offset[2:1];
+                    stall_out    = 1'b1;
+
+                    next_state = (|busy ? 4'd13 : 4'd1);
                 end
 
                 default: begin

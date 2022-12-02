@@ -46,6 +46,7 @@ ctrl  = controller
       wire          dirty_c0;
       wire          valid_c0;
       wire          err_c0;
+      wire [4:0] 	tag_m;
 
       // Main Memory
       wire [15:0]   data_out_m;
@@ -160,9 +161,14 @@ ctrl  = controller
 
       // Cache Zero Offset Concat
       assign offset_c0 = {word_c_ctrl, Addr[0]};
+      
+      // Cache Zero Tag Concat
+      assign tag_m = (mem_wr_ctrl ? tag_out_c0 : Addr[15:11]);
 
       // Main Memory Addr Concat
-      assign addr_m = {Addr[15:3], word_m_ctrl, Addr[0]};
+      assign addr_m = {tag_m, Addr[10:3], word_m_ctrl, Addr[0]};
+      
+
 
 
 /////////////
