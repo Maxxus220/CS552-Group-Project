@@ -179,7 +179,7 @@ module proc (/*AUTOARG*/
 		
 		// Assign the system clock signal
 		// Utilize memWrite and MemToReg to determine memory operations
-		assign sysclk = (rst ? clk : (MemDone_FETCH));
+		assign sysclk = (rst ? clk : (!(MemRead | MemWrite) ? (MemDone_FETCH) : (/*What to do if mem is working*/)));
 
    				
 endmodule // proc
