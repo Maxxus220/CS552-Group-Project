@@ -42,6 +42,7 @@ module proc (/*AUTOARG*/
 		wire [15:0] DataOut_EXECUTE, DataOut_MEMORY, DataOut_WB;
 		wire [15:0] WriteData_EXECUTE, WriteData_MEMORY;
 		wire [15:0] MemOut_MEMORY, MemOut_WB;
+		wire MemDone_FETCH, MemStall_FETCH;
 
 //////////////////////
 // CONTROL SIGNALS //
@@ -125,15 +126,16 @@ module proc (/*AUTOARG*/
 	
 		// Fetch
 		fetch FETCH(
-			.clk(sysclk), .rst(rst), 
+			.clk(clk), .rst(rst), .sysclk(sysclk),
 			.JBAdr(JBAdr), 																					// fetch data inputs
 			.Enable(ControlSignals_DECODE[7]), .Dump(Halt), .stall(Stall), .BrJmpTaken(BrJmpTaken),			// fetch control inputs
-			.instr(Instr_FETCH), .PCplus2(PCplus2_FETCH)													// fetch outputs
+			.instr(Instr_FETCH), .PCplus2(PCplus2_FETCH),													// fetch outputs
+			.mem_stall(MemStall_FETCH), .mem_done(MemDone_FETCH)											// ^^^^^^^^^^^^^
 		); 													
 		
 		// Decode
 		decode DECODE(
-			.clk(sysclk), .rst(rst), 
+			.sysclk(sysclk), .rst(rst), 
 			.instr(Instr_DECODE), .instr_wb(Instr_WB), .RegData(RegData_WB),								// decode data inputs
 			.RegDst(ControlSignals_WB[3:2]), .RegWrite(ControlSignals_WB[1]), 								// decode control inputs
 			.Reg1(Reg1_DECODE), .Reg2(Reg2_DECODE), 														// decode outputs
@@ -142,7 +144,7 @@ module proc (/*AUTOARG*/
 					
 		// Execute
 		execute EXECUTE(
-			.clk(sysclk), .rst(rst), 
+			.sysclk(sysclk), .rst(rst), 
 			.Reg1(Reg1_EXECUTE), .Reg2(Reg2_EXECUTE), .JumpOffset(JumpOffset_EXECUTE), 						// execute data inputs
 			.PCplus2(PCplus2_EXECUTE), .Instr_Imm(Instr_Imm_EXECUTE), 										// ^^^^^^^^^^^^^^^^^^^
 			.ExtMode(ControlSignals_EXECUTE[19]), .IType(ControlSignals_EXECUTE[18]),						// execute control inputs 
@@ -157,9 +159,9 @@ module proc (/*AUTOARG*/
 			.WriteData(WriteData_EXECUTE), .BrJmpTaken(BrJmpTaken)											// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 		); 							
 			
-		// MemoryMemOut_ME
+		// Memory
 		memory MEMORY(
-			.clk(clk), .rst(rst), .ALUOut(ALUOut_MEMORY), .WriteData(WriteData_MEMORY),					// memory data inputs
+			.clk(clk), .sysclk(sysclk), .rst(rst), .ALUOut(ALUOut_MEMORY), .WriteData(WriteData_MEMORY),					// memory data inputs
 			.MemToReg(ControlSignals_MEMORY[4]), .MemWrite(ControlSignals_MEMORY[5]), 						// memory control inputs
 			.Enable(ControlSignals_MEMORY[7]), .Dump(ControlSignals_MEMORY[6]), 							// ^^^^^^^^^^^^^^^^^^^^^
 			.MemOut(MemOut_MEMORY), .stall(mem_stall)														// memory outputs	
@@ -167,7 +169,7 @@ module proc (/*AUTOARG*/
 			
 		// Writeback
 		wb WRITEBACK(
-			.clk(sysclk), .rst(rst), .DataOut(DataOut_WB), .MemOut(MemOut_WB), .PCplus2(PCplus2_WB), 		// wb data inputs
+			.sysclk(sysclk), .rst(rst), .DataOut(DataOut_WB), .MemOut(MemOut_WB), .PCplus2(PCplus2_WB), 		// wb data inputs
 			.MemtoReg(ControlSignals_WB[4]), .AdrLink(ControlSignals_WB[0]), 								// wb control inputs
 			.RegData(RegData_WB)																			// wb outputs
 		);																			
@@ -177,9 +179,7 @@ module proc (/*AUTOARG*/
 		
 		// Assign the system clock signal
 		// Utilize memWrite and MemToReg to determine memory operations
-		assign sysclk1 = (~fetch_stall) & clk;
-		assign sysclk2 = (ControlSignals_MEMORY[5] | ControlSignals_MEMORY[4]) ? ((~mem_stall) & clk) : (clk);
-		assign sysclk = sysclk2;
+		assign sysclk = (rst ? clk : (MemDone_FETCH));
 
    				
 endmodule // proc

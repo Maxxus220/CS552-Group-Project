@@ -10,7 +10,7 @@ module forwarding_check(
 // WIRES //
 //////////
 
-        wire [2:0]
+        reg [2:0]
         src1,
         src2,
         dest;

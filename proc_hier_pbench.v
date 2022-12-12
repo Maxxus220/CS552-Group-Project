@@ -74,7 +74,7 @@ module proc_hier_pbench();
       
    end
 
-   always @ (posedge DUT.c0.clk) begin
+   always @ (posedge DUT.p0.sysclk) begin
       if (!DUT.c0.rst) begin
          if (Halt || RegWrite || MemWrite) begin
             inst_count = inst_count + 1;
