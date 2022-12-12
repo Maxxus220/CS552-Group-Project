@@ -42,7 +42,6 @@ module proc (/*AUTOARG*/
 		wire [15:0] DataOut_EXECUTE, DataOut_MEMORY, DataOut_WB;
 		wire [15:0] WriteData_EXECUTE, WriteData_MEMORY;
 		wire [15:0] MemOut_MEMORY, MemOut_WB;
-		wire MemDone_FETCH, MemStall_FETCH;
 
 //////////////////////
 // CONTROL SIGNALS //
@@ -56,6 +55,12 @@ module proc (/*AUTOARG*/
 		wire sysclk1, sysclk2, sysclk;
 		wire Halt;
 		wire BrJmpTaken;
+
+		wire MemDone_FETCH, MemStall_FETCH;
+		wire MemDone_MEM, MemStall_MEM;
+
+		wire MemStall_BOTH;
+		assign MemStall_BOTH = MemStall_FETCH | MemStall_MEM;
 	
 
 //////////////////////////////
@@ -67,11 +72,11 @@ module proc (/*AUTOARG*/
 		control CONTROL(.clk(sysclk), .rst(rst), .Control(Control), .ALUControl(Instr_Imm_DECODE[1:0]), .ControlSignals(ControlSignals_DECODE));
 
 		// Decode/Execute
-		dff DX_FF [26:0] (.q({ControlSignals_EXECUTE}), .d({ControlSignals_DECODE}), .clk(sysclk), .rst(rst | BrJmpTaken));
+		dff DX_FF [26:0] (.q({ControlSignals_EXECUTE}), .d({ControlSignals_DECODE}), .clk(clk & ~MemStall_BOTH), .rst(rst | BrJmpTaken));
 		// Execute/Memory
-		dff XM_FF [26:0] (.q({ControlSignals_MEMORY}), .d({ControlSignals_EXECUTE}), .clk(sysclk), .rst(rst));
+		dff XM_FF [26:0] (.q({ControlSignals_MEMORY}), .d({ControlSignals_EXECUTE}), .clk(clk & ~MemStall_BOTH), .rst(rst));
 		// Memory/Write-Back
-		dff MW_FF [26:0] (.q({ControlSignals_WB}), .d({ControlSignals_MEMORY}), .clk(sysclk), .rst(rst));
+		dff MW_FF [26:0] (.q({ControlSignals_WB}), .d({ControlSignals_MEMORY}), .clk(clk & ~MemStall_BOTH), .rst(rst));
 	
 
 ///////////////////////////
@@ -80,19 +85,19 @@ module proc (/*AUTOARG*/
 /* Contains latches for data signals */
 
 		// Fetch/Decode	
-		dff FD_FF [31:0] (.q({PCplus2_DECODE,Instr_DECODE_temp}), .d({PCplus2_FETCH,Instr_IN}), .clk(sysclk), .rst(rst | BrJmpTaken));
+		dff FD_FF [31:0] (.q({PCplus2_DECODE,Instr_DECODE_temp}), .d({PCplus2_FETCH,Instr_IN}), .clk(clk & ~MemStall_BOTH), .rst(rst | BrJmpTaken));
 		// Decode/Execute
 		dff DX_DATA_FF [71:0] (.q({Instr_Imm_EXECUTE,JumpOffset_EXECUTE,PCplus2_EXECUTE,Reg2_EXECUTE,Reg1_EXECUTE}), 
 							.d({Instr_Imm_DECODE,JumpOffset_DECODE,PCplus2_DECODE,Reg2_DECODE,Reg1_DECODE}), 
-							.clk(sysclk), .rst(rst | BrJmpTaken));
+							.clk(clk & ~MemStall_BOTH), .rst(rst | BrJmpTaken));
 		// Execute/Memory
 		dff XM_DATA_FF [63:0] (.q({PCplus2_MEMORY,DataOut_MEMORY,WriteData_MEMORY,ALUOut_MEMORY}), 
 							.d({PCplus2_EXECUTE,DataOut_EXECUTE,WriteData_EXECUTE,ALUOut_EXECUTE}), 
-							.clk(sysclk), .rst(rst));   		
+							.clk(clk & ~MemStall_BOTH), .rst(rst));   		
 		// Memory/Writeback	
 		dff MW_DATA_FF [47:0] (.q({PCplus2_WB,MemOut_WB,DataOut_WB}), 
 							.d({PCplus2_MEMORY,MemOut_MEMORY,DataOut_MEMORY}), 
-							.clk(sysclk), .rst(rst));
+							.clk(clk & ~MemStall_BOTH), .rst(rst));
 
 
 ////////////////////////////
@@ -101,13 +106,13 @@ module proc (/*AUTOARG*/
 /* Contains "latches" for instructions */
 
 		// Fetch/Decode
-		dff FD_Inst [15:0] (.q(Instr_DECODE), .d((rst | BrJmpTaken) ? (16'h0800) : (Instr_IN)), .clk(sysclk), .rst(1'b0));
+		dff FD_Inst [15:0] (.q(Instr_DECODE), .d((rst | BrJmpTaken) ? (16'h0800) : (Instr_IN)), .clk(clk & ~MemStall_BOTH), .rst(1'b0));
 		// Decode/Execute
-		dff DX_Inst [15:0] (.q(Instr_EXECUTE), .d((rst | BrJmpTaken) ? (16'h0800) : (Instr_DECODE)), .clk(sysclk), .rst(1'b0));   	
+		dff DX_Inst [15:0] (.q(Instr_EXECUTE), .d((rst | BrJmpTaken) ? (16'h0800) : (Instr_DECODE)), .clk(clk & ~MemStall_BOTH), .rst(1'b0));   	
 		// Execute/Memory
-		dff XM_Inst [15:0] (.q(Instr_MEMORY), .d((rst) ? (16'h0800) : (Instr_EXECUTE)), .clk(sysclk), .rst(1'b0));   	
+		dff XM_Inst [15:0] (.q(Instr_MEMORY), .d((rst) ? (16'h0800) : (Instr_EXECUTE)), .clk(clk & ~MemStall_BOTH), .rst(1'b0));   	
 		// Memory/Writeback
-		dff MW_Inst [15:0] (.q(Instr_WB), .d((rst) ? (16'h0800) : (Instr_MEMORY)), .clk(sysclk), .rst(1'b0));
+		dff MW_Inst [15:0] (.q(Instr_WB), .d((rst) ? (16'h0800) : (Instr_MEMORY)), .clk(clk & ~MemStall_BOTH), .rst(1'b0));
    	
 
 //////////////////////////////////
@@ -164,7 +169,7 @@ module proc (/*AUTOARG*/
 			.clk(clk), .sysclk(sysclk), .rst(rst), .ALUOut(ALUOut_MEMORY), .WriteData(WriteData_MEMORY),					// memory data inputs
 			.MemToReg(ControlSignals_MEMORY[4]), .MemWrite(ControlSignals_MEMORY[5]), 						// memory control inputs
 			.Enable(ControlSignals_MEMORY[7]), .Dump(ControlSignals_MEMORY[6]), 							// ^^^^^^^^^^^^^^^^^^^^^
-			.MemOut(MemOut_MEMORY), .stall(mem_stall)														// memory outputs	
+			.MemOut(MemOut_MEMORY), .stall(mem_stall), .mem_stall(MemStall_MEM), .mem_done(MemDone_MEM)														// memory outputs	
 		); 																									
 			
 		// Writeback
@@ -175,7 +180,7 @@ module proc (/*AUTOARG*/
 		);																			
 		
 		// Assign whether the program should propogate halts
-		dff WF_CTRL_FF (.q(Halt), .d((~(|Instr_WB[15:11]))), .clk(sysclk), .rst(rst));
+		dff WF_CTRL_FF (.q(Halt), .d((~(|Instr_WB[15:11]))), .clk(clk & ~MemStall_BOTH), .rst(rst));
 		
 		// Assign the system clock signal
 		// Utilize memWrite and MemToReg to determine memory operations
