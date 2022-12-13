@@ -33,6 +33,7 @@ module forwarding_check(
 //////////////////
 
         assign forward = match1 | match2;
+        // Need to make sure only match2 is up since immediates set src1 and src2 to the same value
         assign src = match2 & ~match1;
 
 

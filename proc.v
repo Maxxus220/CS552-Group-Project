@@ -210,6 +210,8 @@ module proc (/*AUTOARG*/
 			.forward_rs_enabled(Rs_Enabled_FORWARD) 
 		);
 
+		// Values that are passed into the execute stage
+		// If forwarding occurs for that register the forwarded value is passed instead of the default
 		assign ForwardRS = (Rs_Enabled_FORWARD ? (Rs_FORWARD ? ForwardOut_WB : ForwardOut_MEM) : Reg1_EXECUTE);
 		assign ForwardRT = (Rt_Enabled_FORWARD ? (Rt_FORWARD ? ForwardOut_WB : ForwardOut_MEM) : Reg2_EXECUTE);
 
