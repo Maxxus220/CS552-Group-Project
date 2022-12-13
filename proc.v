@@ -53,6 +53,13 @@ module proc (/*AUTOARG*/
 		wire Halt;
 		wire BrJmpTaken;
 		wire Stall;
+		wire HaltInPipeline;
+		assign HaltInPipeline = (
+								(Instr_DECODE[15:11] == 5'd0) |
+								(Instr_EXECUTE[15:11] == 5'd0) |
+								(Instr_MEMORY[15:11] == 5'd0) |
+								(Instr_WB[15:11] == 5'd0)
+								) ? 1'b1 : 1'b0;
 
 		wire MemStall_FETCH, MemStall_MEM;
 		wire MemStall_BOTH;
@@ -140,7 +147,7 @@ module proc (/*AUTOARG*/
 		fetch FETCH(
 			.clk(clk), .rst(rst),
 			.JBAdr(JBAdr), 																					// fetch data inputs
-			.Dump(Halt), .stall(Stall), .BrJmpTaken(BrJmpTaken),			// fetch control inputs
+			.Dump(Halt), .stall(Stall), .BrJmpTaken(BrJmpTaken), .HaltInPipeline(HaltInPipeline),			// fetch control inputs
 			.instr(Instr_FETCH), .PCplus2(PCplus2_FETCH),													// fetch outputs
 			.mem_stall(MemStall_FETCH), .mem_done(MemDone_FETCH), .mem_stall_both(MemStall_BOTH)											// ^^^^^^^^^^^^^
 		); 													

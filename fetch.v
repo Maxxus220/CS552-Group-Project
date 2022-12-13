@@ -4,7 +4,7 @@
    Filename        : fetch.v
    Description     : This is the module for the overall fetch stage of the processor.
 */
-module fetch (clk, rst, JBAdr, Dump, stall, instr, PCplus2, BrJmpTaken, mem_stall, mem_done, mem_stall_both);
+module fetch (clk, rst, JBAdr, Dump, stall, instr, PCplus2, BrJmpTaken, mem_stall, mem_done, mem_stall_both, HaltInPipeline);
 
 //////////////
 // SIGNALS //
@@ -18,6 +18,8 @@ module fetch (clk, rst, JBAdr, Dump, stall, instr, PCplus2, BrJmpTaken, mem_stal
 
       // control inputs
       input Dump, stall, BrJmpTaken;
+
+      input HaltInPipeline;
 
       input mem_stall_both;
 
@@ -41,7 +43,7 @@ module fetch (clk, rst, JBAdr, Dump, stall, instr, PCplus2, BrJmpTaken, mem_stal
       /* Takes a PC address which can come from either the jump/branch or PC+2
          Instruction memory is read-only and always enabled */
       mem_system IMEM (.DataOut(instr_fetch), .Done(mem_done), .Stall(mem_stall), .CacheHit(), .err(),
-                        .DataIn(16'h0000), .Addr(PC), .Rd(1'b1), .Wr(1'b0), .createdump(Dump), .clk(clk), .rst(rst));
+                        .DataIn(16'h0000), .Addr(PC), .Rd(~HaltInPipeline), .Wr(1'b0), .createdump(Dump), .clk(clk), .rst(rst));
       
       // Generates PC+2
       cla_16b ADD2(.sum(PCplus2), .c_out(dummy), .a(PC), .b(16'h0002), .c_in(1'b0));
