@@ -3,8 +3,8 @@ module forwarding_check(
 	input rst,
     input [15:0] inst1,
 	input [15:0] inst2,
-    output src, // Which register matched [0: rs | 1: rt]
-	output forward
+    output matchRs,
+    output matchRt
 );
 ////////////
 // WIRES //
@@ -32,9 +32,9 @@ module forwarding_check(
 // FORWARD LOGIC //
 //////////////////
 
-        assign forward = match1 | match2;
         // Need to make sure only match2 is up since immediates set src1 and src2 to the same value
-        assign src = match2 & ~match1;
+        assign matchRs = match1;
+        assign matchRt = match2;
 
 
 ///////////////////////////
@@ -69,7 +69,7 @@ module forwarding_check(
                     // Immediate shifts
                     5'b10100, 5'b10101, 5'b10110, 5'b10111: begin
                         src1 = inst1[10:8];
-                        src2 = inst1[10:8];				
+                        src2 = 3'bzzz;				
                     end
                     // Store
                     5'b10000: begin
@@ -79,7 +79,7 @@ module forwarding_check(
                     // Load
                     5'b10001: begin
                         src1 = inst1[10:8];
-                        src2 = inst1[10:8];				
+                        src2 = 3'bzzz;				
                     end
                     // STU
                     5'b10011: begin
@@ -90,17 +90,17 @@ module forwarding_check(
                     // SLBI
                     5'b10010: begin
                         src1 = inst1[10:8];
-                        src2 = inst1[10:8];				
+                        src2 = 3'bzzz;				
                     end
                     // JR & JALR
                     5'b00101, 5'b00111: begin
                         src1 = inst1[10:8];
-                        src2 = inst1[10:8];			
+                        src2 = 3'bzzz;			
                     end
                     // Branch
                     5'b01100, 5'b01101, 5'b01110, 5'b01111: begin
                         src1 = inst1[10:8];
-                        src2 = inst1[10:8];				
+                        src2 = 3'bzzz;				
                     end
                     // J - Format & Other
                     default: begin

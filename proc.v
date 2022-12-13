@@ -63,7 +63,6 @@ module proc (/*AUTOARG*/
 // FORWARDING SIGNALS //
 ///////////////////////
 
-		wire [15:0] ForwardData;
 		wire [15:0] ForwardRS;
 		wire [15:0] ForwardRT;
 		wire [15:0] ForwardOut_MEM, ForwardOut_WB;
@@ -177,7 +176,8 @@ module proc (/*AUTOARG*/
 			.clk(clk), .rst(rst), .ALUOut(ALUOut_MEMORY), .WriteData(WriteData_MEMORY),					// memory data inputs
 			.MemToReg(ControlSignals_MEMORY[4]), .MemWrite(ControlSignals_MEMORY[5]), 					// memory control inputs
 			.Enable(ControlSignals_MEMORY[7]), .Dump(ControlSignals_MEMORY[6]), 						// ^^^^^^^^^^^^^^^^^^^^^
-			.MemOut(MemOut_MEMORY), .mem_stall(MemStall_MEM), .forward_out(ForwardOut_MEM)				// memory outputs	
+			.MemOut(MemOut_MEMORY), .EXDataOut(DataOut_MEMORY), .mem_stall(MemStall_MEM), 
+			.forward_out(ForwardOut_MEM)																// memory outputs	
 		); 																									
 			
 		// Writeback

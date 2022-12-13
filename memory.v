@@ -5,7 +5,7 @@
    Description     : This module contains all components in the Memory stage of the 
                      processor.
 */
-module memory (clk, rst, ALUOut, WriteData, Enable, Dump, MemToReg, MemWrite, MemOut, mem_stall, forward_out);
+module memory (clk, rst, ALUOut, WriteData, Enable, Dump, MemToReg, MemWrite, MemOut, mem_stall, forward_out, EXDataOut);
 
 //////////////
 // SIGNALS //
@@ -19,6 +19,8 @@ module memory (clk, rst, ALUOut, WriteData, Enable, Dump, MemToReg, MemWrite, Me
 
       // control inputs
       input MemToReg, Enable, Dump, MemWrite;
+
+      input [15:0] EXDataOut;
 
       // data outputs
       output [15:0] MemOut; // to wb
@@ -37,7 +39,7 @@ module memory (clk, rst, ALUOut, WriteData, Enable, Dump, MemToReg, MemWrite, Me
       mem_system IMEM (.DataOut(MemOut), .Done(), .Stall(mem_stall), .CacheHit(), .err(),
                         .DataIn(WriteData), .Addr(ALUOut), .Rd(Enable & ~MemWrite), .Wr(Enable & MemWrite), .createdump(Dump), .clk(clk), .rst(rst));
       
-      assign forward_out = MemToReg ? MemOut : ALUOut;
+      assign forward_out = MemToReg ? MemOut : EXDataOut;
       
    
 endmodule
