@@ -57,6 +57,18 @@ module proc (/*AUTOARG*/
 		wire MemStall_FETCH, MemStall_MEM;
 		wire MemStall_BOTH;
 		assign MemStall_BOTH = MemStall_FETCH | MemStall_MEM;
+
+
+/////////////////////////
+// FORWARDING SIGNALS //
+///////////////////////
+
+		wire [15:0] ForwardData;
+		wire [15:0] ForwardRS;
+		wire [15:0] ForwardRT;
+		wire [15:0] ForwardOut_MEM, ForwardOut_WB;
+		wire Rs_FORWARD, Rt_FORWARD;
+		wire Rs_Enabled_FORWARD, Rt_Enabled_FORWARD;
 	
 
 //////////////////////////////
@@ -146,7 +158,7 @@ module proc (/*AUTOARG*/
 		// Execute
 		execute EXECUTE(
 			.clk(clk), .rst(rst), 
-			.Reg1(Reg1_EXECUTE), .Reg2(Reg2_EXECUTE), .JumpOffset(JumpOffset_EXECUTE), 						// execute data inputs
+			.Reg1(ForwardRS), .Reg2(ForwardRT), .JumpOffset(JumpOffset_EXECUTE), 						// execute data inputs
 			.PCplus2(PCplus2_EXECUTE), .Instr_Imm(Instr_Imm_EXECUTE), 										// ^^^^^^^^^^^^^^^^^^^
 			.ExtMode(ControlSignals_EXECUTE[19]), .IType(ControlSignals_EXECUTE[18]),						// execute control inputs 
 			.Reg1Rev(ControlSignals_EXECUTE[17]), .Reg1Shift(ControlSignals_EXECUTE[16]), 					// ^^^^^^^^^^^^^^^^^^^^^^
@@ -163,20 +175,43 @@ module proc (/*AUTOARG*/
 		// Memory
 		memory MEMORY(
 			.clk(clk), .rst(rst), .ALUOut(ALUOut_MEMORY), .WriteData(WriteData_MEMORY),					// memory data inputs
-			.MemToReg(ControlSignals_MEMORY[4]), .MemWrite(ControlSignals_MEMORY[5]), 						// memory control inputs
-			.Enable(ControlSignals_MEMORY[7]), .Dump(ControlSignals_MEMORY[6]), 							// ^^^^^^^^^^^^^^^^^^^^^
-			.MemOut(MemOut_MEMORY), .mem_stall(MemStall_MEM)														// memory outputs	
+			.MemToReg(ControlSignals_MEMORY[4]), .MemWrite(ControlSignals_MEMORY[5]), 					// memory control inputs
+			.Enable(ControlSignals_MEMORY[7]), .Dump(ControlSignals_MEMORY[6]), 						// ^^^^^^^^^^^^^^^^^^^^^
+			.MemOut(MemOut_MEMORY), .mem_stall(MemStall_MEM), .forward_out(ForwardOut_MEM)				// memory outputs	
 		); 																									
 			
 		// Writeback
 		wb WRITEBACK(
 			.clk(clk), .rst(rst), .DataOut(DataOut_WB), .MemOut(MemOut_WB), .PCplus2(PCplus2_WB), 	// wb data inputs
-			.MemtoReg(ControlSignals_WB[4]), .AdrLink(ControlSignals_WB[0]), 								// wb control inputs
-			.RegData(RegData_WB)																			// wb outputs
+			.MemtoReg(ControlSignals_WB[4]), .AdrLink(ControlSignals_WB[0]), 						// wb control inputs
+			.RegData(RegData_WB), .forward_out(ForwardOut_WB)										// wb outputs
 		);																			
 		
 		// Assign whether the program should propogate halts
 		dff_en WF_CTRL_FF (.q(Halt), .d((~(|Instr_WB[15:11]))), .clk(clk), .rst(rst), .en(~MemStall_BOTH));
+
+
+/////////////////
+// FORWARDING //
+///////////////
+
+		forwarding_controller FORWARD(
+			.clk(clk),
+			.rst(rst),
+			.ex_inst(Instr_EXECUTE),
+			.mem_inst(Instr_MEMORY),
+			.wb_inst(Instr_WB),
+
+			// rt and rs tell us where to forward from (0 means forward that reg from mem | 1 means forward that reg from wb)
+			.forward_rt(Rt_FORWARD),
+			.forward_rs(Rs_FORWARD),   
+			// the corresponding enabled signals tell us whether we should forward in the first place
+			.forward_rt_enabled(Rt_Enabled_FORWARD), 
+			.forward_rs_enabled(Rs_Enabled_FORWARD) 
+		);
+
+		assign ForwardRS = (Rs_Enabled_FORWARD ? (Rs_FORWARD ? ForwardOut_WB : ForwardOut_MEM) : Reg1_EXECUTE);
+		assign ForwardRT = (Rt_Enabled_FORWARD ? (Rt_FORWARD ? ForwardOut_WB : ForwardOut_MEM) : Reg2_EXECUTE);
 
    				
 endmodule // proc

@@ -33,7 +33,7 @@ module forwarding_check(
 //////////////////
 
         assign forward = match1 | match2;
-        assign src = match2;
+        assign src = match2 & ~match1;
 
 
 ///////////////////////////

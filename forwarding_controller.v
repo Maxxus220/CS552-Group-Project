@@ -8,14 +8,15 @@ NOTE: Only one of the forwarding signals can be high or neither
 
 module forwarding_controller(
     input clk,
-	input rst,
+    input rst,
     input [15:0] ex_inst,
     input [15:0] mem_inst,
     input [15:0] wb_inst,
 
-    output forward_rt,   // 0: forwards to rs  |  1: forwards to rt 
-    output mem_ex_forward, // forward from ex->ex
-    output wb_ex_forward // forward from mem->ex
+    output forward_rt,
+    output forward_rs,
+    output forward_rs_enabled,
+    output forward_rt_enabled
 );
 
 ////////////
@@ -42,9 +43,27 @@ module forwarding_controller(
 ///////////////////////
 // FORWARDING LOGIC //
 /////////////////////
-        assign mem_ex_forward = mem_ex_check;
-        assign wb_ex_forward = (mem_ex_check ? 1'b0 : wb_ex_check);
-        assign forward_rt = (mem_ex_check ? mem_ex_src : wb_ex_src);
+
+        // If src's match forward earliest allowed
+        // If src's are different forward both
+        wire mem_is_forwarding_rs;
+        wire mem_is_forwarding_rt;
+
+        wire wb_is_forwarding_rs;
+        wire wb_is_forwarding_rt;
+
+        // forward_rs and rt 0: forward from mem | 1: forward from wb
+        assign mem_is_forwarding_rs = (!mem_ex_src & mem_ex_check & (mem_inst[15:11] != 5'd17));
+        assign mem_is_forwarding_rt = (mem_ex_src & mem_ex_check & (mem_inst[15:11] != 5'd17));
+
+        assign wb_is_forwarding_rs = (!wb_ex_src & wb_ex_check);
+        assign wb_is_forwarding_rt = (wb_ex_src & wb_ex_check);
+
+
+        assign forward_rs = (mem_is_forwarding_rs & wb_is_forwarding_rs) ? 1'b0 : (mem_is_forwarding_rs ? 1'b0 : 1'b1);
+        assign forward_rt = (mem_is_forwarding_rt & wb_is_forwarding_rt) ? 1'b0 : (mem_is_forwarding_rt ? 1'b0 : 1'b1);
+        assign forward_rs_enabled = mem_is_forwarding_rs | wb_is_forwarding_rs;
+        assign forward_rt_enabled = mem_is_forwarding_rt | wb_is_forwarding_rt;
 
 
 

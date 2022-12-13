@@ -4,7 +4,7 @@
    Filename        : wb.v
    Description     : This is the module for the overall Write Back stage of the processor.
 */
-module wb (clk, rst, DataOut, MemOut, PCplus2, MemtoReg, AdrLink, RegData);
+module wb (clk, rst, DataOut, MemOut, PCplus2, MemtoReg, AdrLink, RegData, forward_out);
 
 //////////////
 // SIGNALS //
@@ -23,6 +23,7 @@ module wb (clk, rst, DataOut, MemOut, PCplus2, MemtoReg, AdrLink, RegData);
 
       // data outputs
       output [15:0] RegData; // to decode
+      output [15:0] forward_out;
       
       wire [15:0] RegIn;
    
@@ -33,5 +34,7 @@ module wb (clk, rst, DataOut, MemOut, PCplus2, MemtoReg, AdrLink, RegData);
 
       mux16_2 MUX_MemtoReg(.out(RegIn), .in0(DataOut), .in1(MemOut), .sel(MemtoReg));
       mux16_2 MUX_AdrLink(.out(RegData), .in0(RegIn), .in1(PCplus2), .sel(AdrLink));
+
+      assign forward_out = RegData;
    
 endmodule
