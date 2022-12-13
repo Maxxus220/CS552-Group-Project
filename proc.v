@@ -149,7 +149,7 @@ module proc (/*AUTOARG*/
 			.JBAdr(JBAdr), 																					// fetch data inputs
 			.Dump(Halt), .stall(Stall), .BrJmpTaken(BrJmpTaken), .HaltInPipeline(HaltInPipeline),			// fetch control inputs
 			.instr(Instr_FETCH), .PCplus2(PCplus2_FETCH),													// fetch outputs
-			.mem_stall(MemStall_FETCH), .mem_done(MemDone_FETCH), .mem_stall_both(MemStall_BOTH)											// ^^^^^^^^^^^^^
+			.mem_stall(MemStall_FETCH), .mem_done(MemDone_FETCH), .mem_stall_both(MemStall_BOTH)			// ^^^^^^^^^^^^^
 		); 													
 		
 		// Decode
