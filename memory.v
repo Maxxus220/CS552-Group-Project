@@ -5,14 +5,14 @@
    Description     : This module contains all components in the Memory stage of the 
                      processor.
 */
-module memory (clk, sysclk, rst, ALUOut, WriteData, Enable, Dump, MemToReg, MemWrite, MemOut, stall);
+module memory (clk, rst, ALUOut, WriteData, Enable, Dump, MemToReg, MemWrite, MemOut, mem_stall);
 
 //////////////
 // SIGNALS //
 ////////////
 
       // clk/rst
-      input clk, rst, sysclk;
+      input clk, rst;
 
       // data inputs
       input [15:0] ALUOut, WriteData; // from execute
@@ -22,7 +22,7 @@ module memory (clk, sysclk, rst, ALUOut, WriteData, Enable, Dump, MemToReg, MemW
 
       // data outputs
       output [15:0] MemOut; // to wb
-      output stall;
+      output mem_stall;
       
       wire err;
       wire [3:0] busy;
@@ -31,8 +31,10 @@ module memory (clk, sysclk, rst, ALUOut, WriteData, Enable, Dump, MemToReg, MemW
 // MODULES //
 ////////////
 
-      memory2c DMEM(.data_out(MemOut), .data_in(WriteData), .addr(ALUOut), .enable(Enable), .wr(MemWrite), .createdump(Dump), .clk(sysclk), .rst(rst));
+      //memory2c DMEM(.data_out(MemOut), .data_in(WriteData), .addr(ALUOut), .enable(Enable), .wr(MemWrite), .createdump(Dump), .clk(clk), .rst(rst));
+
+      mem_system IMEM (.DataOut(MemOut), .Done(), .Stall(mem_stall), .CacheHit(), .err(),
+                        .DataIn(WriteData), .Addr(ALUOut), .Rd(Enable & ~MemWrite), .Wr(Enable & MemWrite), .createdump(Dump), .clk(clk), .rst(rst));
       
-      //four_bank_mem DRAM(.clk(sysclk), .rst(rst), .createdump(Dump), .addr(ALUOut), .data_in(WriteData), .wr(MemWrite), .rd(MemToReg), .data_out(MemOut), .stall(stall), .busy(busy), .err(err));
    
 endmodule

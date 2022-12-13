@@ -4,14 +4,14 @@
    Filename        : decode.v
    Description     : This is the module for the overall decode stage of the processor.
 */
-module decode (sysclk, rst, instr, instr_wb, RegData, RegDst, RegWrite, Reg1, Reg2, JumpOffset, Instr_Imm, Control);
+module decode (clk, rst, instr, instr_wb, RegData, RegDst, RegWrite, Reg1, Reg2, JumpOffset, Instr_Imm, Control);
 
 //////////////
 // SIGNALS //
 ////////////
 
-		// sysclk/rst
-		input sysclk, rst;
+		// clk/rst
+		input clk, rst;
 
 		// data inputs
 		input [15:0] instr; // from fetch
@@ -45,7 +45,7 @@ module decode (sysclk, rst, instr, instr_wb, RegData, RegDst, RegWrite, Reg1, Re
 
 		// register file with bypass logic
 		// technically we don't need bypass logic for a single-cycle datapath, but it won't hurt to have it for later
-		regFile REG_FILE(.read1Data(Reg1), .read2Data(Reg2), .err(err), .clk(sysclk), .rst(rst), 
+		regFile REG_FILE(.read1Data(Reg1), .read2Data(Reg2), .err(err), .clk(clk), .rst(rst), 
 			.read1RegSel(instr[10:8]), .read2RegSel(instr[7:5]), .writeRegSel(WriteAdr), .writeData(RegData), .writeEn(RegWrite));
 			
 endmodule

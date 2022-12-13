@@ -8,7 +8,7 @@ module dff_en (q, d, en, clk, rst);
     input          clk;
     input          rst;
 
-	wire temp
+	wire temp;
 	assign temp = (en ? d : q);
     dff FF(.q(q), .d(temp), .clk(clk), .rst(rst));
 

@@ -4,14 +4,14 @@
    Filename        : wb.v
    Description     : This is the module for the overall Write Back stage of the processor.
 */
-module wb (sysclk, rst, DataOut, MemOut, PCplus2, MemtoReg, AdrLink, RegData);
+module wb (clk, rst, DataOut, MemOut, PCplus2, MemtoReg, AdrLink, RegData);
 
 //////////////
 // SIGNALS //
 ////////////
 
-      // sysclk/rst
-      input sysclk, rst;
+      // clk/rst
+      input clk, rst;
 
       // data inputs
       input [15:0] DataOut; // from execute 

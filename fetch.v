@@ -4,20 +4,22 @@
    Filename        : fetch.v
    Description     : This is the module for the overall fetch stage of the processor.
 */
-module fetch (clk, sysclk, rst, JBAdr, Enable, Dump, stall, instr, PCplus2, BrJmpTaken, mem_stall, mem_done);
+module fetch (clk, rst, JBAdr, Dump, stall, instr, PCplus2, BrJmpTaken, mem_stall, mem_done, mem_stall_both);
 
 //////////////
 // SIGNALS //
 ////////////
 
       // clk/rst
-      input clk, rst, sysclk;
+      input clk, rst;
 
       // data inputs
       input [15:0] JBAdr; // from execute
 
       // control inputs
-      input Enable, Dump, stall, BrJmpTaken;
+      input Dump, stall, BrJmpTaken;
+
+      input mem_stall_both;
 
       // data outputs
       output [15:0] instr; // to decode
@@ -48,7 +50,7 @@ module fetch (clk, sysclk, rst, JBAdr, Enable, Dump, stall, instr, PCplus2, BrJm
       assign newPC = (BrJmpTaken) ? (JBAdr) : ((stall) ? (PC) : (PCplus2));
 
       // Store new PC
-      reg16 PC_REG(.readData(PC), .writeData(newPC), .clk(sysclk), .rst(rst));
+      dff_en PC_REG [15:0] (.q(PC), .d(newPC), .clk(clk), .rst(rst), .en(~mem_stall_both));
       
       assign instr = (Dump) ? (16'h0000) : (instr_fetch);
    

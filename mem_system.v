@@ -206,10 +206,10 @@ ctrl  = controller
 // OUTPUT //
 ///////////
 
-      assign DataOut = ((hit_c1 & valid_c1) ? data_out_c1 : data_out_c0);
-      assign Done = done_ctrl;
-      assign Stall = stall_ctrl;
-      assign CacheHit = cache_hit_ctrl;
+      assign DataOut = rst ? 16'd0 : ((hit_c1 & valid_c1) ? data_out_c1 : data_out_c0);
+      assign Done = rst ? 1'b0 : done_ctrl;
+      assign Stall = rst ? 1'b0 : stall_ctrl;
+      assign CacheHit = rst ? 1'b0 : cache_hit_ctrl;
       assign err = err_c0 | err_m | err_c1;
    
 endmodule // mem_system

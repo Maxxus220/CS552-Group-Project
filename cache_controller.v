@@ -108,15 +108,15 @@ module cache_controller(
                     mem_wr       = 1'b0;
                     mem_rd       = 1'b0;
                     valid_in     = (rd | wr);
-                    done         = 1'b0;
+                    done         = rd ? ((hit_c0 & valid_c0) | (hit_c1 & valid_c1)) : 1'b0;
                     cache_hit    = (hit_c0 & valid_c0) | (hit_c1 & valid_c1);
                     word_m       = offset[2:1];
                     word_c       = offset[2:1];
-                    stall_out    = (rd|wr);
+                    stall_out    = rd ? (!((hit_c0 & valid_c0) | (hit_c1 & valid_c1))) : wr;
                     target       = ((valid_c0 & valid_c1) ? victimway : (!valid_c0 ? 1'b0 : 1'b1));
 
                     next_state = (!(rd | wr) ? 4'd0 :                                                           // Spin
-                                 (((hit_c0 & valid_c0) | (hit_c1 & valid_c1)) ? 4'd2 :                          // Hit
+                                 (((hit_c0 & valid_c0) | (hit_c1 & valid_c1)) ? (rd ? 4'd0 : 4'd2) :            // Hit
                                  (((valid_c0 & valid_c1) & (victimway ? dirty_c1 : dirty_c0)) ? 4'd3 : 4'd7))); // Miss (dirty or clean) 
                 end
                 
@@ -129,19 +129,19 @@ module cache_controller(
                     mem_wr       = 1'b0;
                     mem_rd       = 1'b0;
                     valid_in     = 1'b1;
-                    done         = 1'b0;
+                    done         = rd;
                     cache_hit    = 1'b0;
                     word_m       = offset[2:1];
                     word_c       = offset[2:1];
-                    stall_out    = 1'b1;
+                    stall_out    = !rd;
 
-                    next_state = 4'd2;
+                    next_state = rd ? 4'd0 : 4'd2;
                 end
 
                 // DONE
                 4'd2: begin
-                    enable_c0    = !wr;
-                    enable_c1    = !wr;
+                    enable_c0    = 1'b0;
+                    enable_c1    = 1'b0;
                     comp         = 1'b1;
                     write        = 1'b0;
                     mem_wr       = 1'b0;

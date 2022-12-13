@@ -4,15 +4,15 @@
    Filename        : execute.v
    Description     : This is the overall module for the execute stage of the processor.
 */
-module execute (sysclk, rst, Reg1, Reg2, JumpOffset, PCplus2, Instr_Imm, ExtMode, IType, Reg1Rev, Reg1Shift, 
+module execute (clk, rst, Reg1, Reg2, JumpOffset, PCplus2, Instr_Imm, ExtMode, IType, Reg1Rev, Reg1Shift, 
 				Zero1, Zero2, ALUSrc, BrOp, Branch, JumpType, CompCarry, ALUComp, ALUOp, sign, BrOrJmp, ALUOut, DataOut, JBAdr, WriteData, BrJmpTaken);
 
 //////////////
 // SIGNALS //
 ////////////
 
-		// sysclk/rst
-		input sysclk, rst;
+		// clk/rst
+		input clk, rst;
 
 		// data inputs (all from decode)
 		input [15:0] Reg1, Reg2; // from decode
